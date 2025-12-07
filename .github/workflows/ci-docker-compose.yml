@@ -1,0 +1,36 @@
+name: CI — docker-compose
+
+on:
+  push:
+    branches: [ main, migration_web ]
+  pull_request:
+
+jobs:
+  compose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU (for multi-arch builds)
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and start services with docker compose
+        run: |
+          # uses Compose V2 CLI available on ubuntu-latest
+          docker compose -f docker-compose.yml up --build -d
+
+      - name: Show running services
+        run: docker compose -f docker-compose.yml ps
+
+      # Optional: run tests inside a service. Uncomment & adapt.
+      #- name: Run backend tests
+      #  run: |
+      #    docker compose exec -T backend python -m pytest
+
+      - name: Tear down
+        if: always()
+        run: docker compose -f docker-compose.yml down --volumes --remove-orphans

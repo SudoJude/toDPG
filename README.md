@@ -1,5 +1,7 @@
 # DPG4x-Web
 
+[![CI](https://github.com/d0malaga/dpg4x/actions/workflows/ci-docker-compose.yml/badge.svg?branch=migration_web)](https://github.com/d0malaga/dpg4x/actions/workflows/ci-docker-compose.yml)
+
 A modern web-based converter and manager for DPG video files (used by Nintendo DS homebrew players like Moonshell).
 
 ## Features
@@ -56,3 +58,42 @@ To rebuild after changes:
 ```bash
 docker-compose up -d --build
 ```
+
+## Continuous Integration (CI)
+
+This repository includes a GitHub Actions workflow that builds and exercises the services using `docker compose`.
+
+- Workflow path: `.github/workflows/ci-docker-compose.yml`
+- Runner: `ubuntu-latest` (uses the Compose V2 CLI via `docker compose`)
+
+How the CI job works (summary):
+
+- Checks out the repo.
+- Sets up QEMU and Buildx (useful for multi-arch builds).
+- Runs `docker compose -f docker-compose.yml up --build -d` to build and start services.
+- Shows running services with `docker compose ps`.
+- Tears down the compose stack with `docker compose down --volumes --remove-orphans`.
+
+Run locally (same commands CI uses):
+
+```bash
+# build and start services in background
+docker compose -f docker-compose.yml up --build -d
+
+# show running services
+docker compose -f docker-compose.yml ps
+
+# run a command inside a service (example: run backend tests)
+docker compose exec -T backend python -m pytest
+
+# stop and remove services, volumes
+docker compose -f docker-compose.yml down --volumes --remove-orphans
+```
+
+Notes and customization:
+
+- If your environment does not have the Compose V2 plugin, use the `docker/compose-action@v2` GitHub Action or install the `docker-compose` binary.
+- For GitLab CI or other CI providers that use Docker-in-Docker (DinD), you may need a `privileged` runner or use the Docker socket bind approach on self-hosted runners.
+- Adjust the service name (`backend` in the example) and test commands to match your test setup.
+
+If you want, I can add a short `README` badge or expand the workflow to run your tests automatically — tell me which service(s) and test commands to run in CI.
