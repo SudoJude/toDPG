@@ -1,0 +1,60 @@
+# Gettext message catalog for dpg4x.
+# Copyright (C) 2012
+# This file is distributed under the same license as the dpg4x package.
+#
+# Translators:
+msgid ""
+msgstr ""
+"Project-Id-Version: DPG for X\n"
+"Report-Msgid-Bugs-To: http://sourceforge.net/tracker/?group_id=302222&atid=1274260\n"
+"POT-Creation-Date: 2012-09-13 21:08+0200\n"
+"PO-Revision-Date: 2012-10-08 11:22+0100\n"
+"Last-Translator: Campan <jeanfrancois.campan@gmail.com>\n"
+"Language-Team: French (http://www.transifex.com/projects/p/dpg4x/language/fr/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: fr\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: InstallerTranslations.py:44
+msgid "${Name} is already installed"
+msgstr "${Name} est déjà installé"
+
+#: InstallerTranslations.py:45
+msgid "Uninstall ${Name}"
+msgstr "Désinstallation de ${Name}"
+
+#: InstallerTranslations.py:46
+msgid "${Name} on the web"
+msgstr "${Name} sur internet"
+
+#: InstallerTranslations.py:47
+msgid "Downloading MPlayer..."
+msgstr "Téléchargement  de MPlayer"
+
+#: InstallerTranslations.py:48
+msgid "MPlayer was not successfully installed. Retry?"
+msgstr "MPlayer n'est pas correctement installé. Recommencer ?"
+
+#: InstallerTranslations.py:49
+msgid "Failed to download MPlayer: '$R0'."
+msgstr "Échec du téléchargement de MPlayer : '$R0'."
+
+#: InstallerTranslations.py:50
+msgid "Failed to install MPlayer, needed for encoding. Please install separately."
+msgstr "Échec de l'installation de MPlayer, requis pour l'encodage. SVP installez-le séparément."
+
+#: InstallerTranslations.py:51
+#: InstallerTranslations.py:95
+msgid "DPG encoder GUI - encodes videos for the Nintendo DS player moonshell"
+msgstr "Interface d'encodage DPG - Codeur vidéo pour lecteur moonshell de la Nintendo DS"
+
+#: InstallerTranslations.py:94
+msgid "DPG4X Video Encoder"
+msgstr "Encodeur Vidéo DPG4x"
+
+#: InstallerTranslations.py:96
+msgid "Video Encoder"
+msgstr "Encodeur Vidéo"
+

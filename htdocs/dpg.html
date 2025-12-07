@@ -1,0 +1,140 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" dir="ltr" lang="en"><head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta http-equiv="Content-Style-Type" content="text/css">
+		<meta name="generator" content="MediaWiki 1.15.1">
+		<meta name="keywords" content="DPG">
+		<title>SourceForge.net: DPG - dpg4x</title>
+		<link rel="shortcut icon" href="dpg4x.ico">
+		<link rel="stylesheet" href="styles/shared.css" type="text/css" media="screen">
+		<link rel="stylesheet" href="styles/commonPrint.css" type="text/css" media="print">
+		<link rel="stylesheet" href="styles/main.css" type="text/css" media="screen">
+		<link rel="stylesheet" href="styles/index.css" type="text/css">
+	
+    <link rel="stylesheet" type="text/css" href="styles/hosted.css" media="all">
+
+
+</head>
+<body class="mediawiki ltr ns-0 ns-subject page-DPG skin-sourceforge">
+<div id="sf_header">
+    <div class="sfh_n">
+        <ol class="sfh_n_ol">
+            <li class="sfh_n_li"><span><a href="https://sourceforge.net/" id="sf_logo"><strong>SourceForge</strong></a></span></li>
+            <li class="sfh_n_li"><span><a href="https://sourceforge.net/projects/dpg4x" title="Summary page hosted on SourceForge.net">Summary</a></span></li>
+            <li class="sfh_n_li"><span><a href="https://sourceforge.net/projects/dpg4x/files" title="Files available for download">Files</a></span></li>                            
+			<li class="sfh_n_li"><span><a href="https://sourceforge.net/projects/dpg4x/support">Support</a></span></li>
+        </ol>
+    </div>
+</div>
+
+	<div id="globalWrapper">
+		<div id="column-content">
+	<div id="content">
+		<a name="top" id="top"></a>
+				<h1 id="firstHeading" class="firstHeading">Dpg4x DPG</h1>
+		<div id="bodyContent">
+			<h3 id="siteSub">From dpg4x</h3>
+			<div id="contentSub"></div>
+									<div id="jump-to-nav">Jump to: <a href="#column-one">navigation</a>, <a href="#searchInput">search</a></div>			<!-- start content -->
+			<p>The DPG format is implemented by the Nintendo DS video/music player program <a href="http://wikipedia.org/wiki/MoonShell" title="http://wikipedia.org/wiki/MoonShell">MoonShell</a>. 
+			<br>There exist (as far as we know) no official specifications for the format and this page summarizes what we know.
+</p>
+<table id="toc" class="toc" summary="Contents"><tbody><tr><td><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1"><a href="#DPG_Versions"><span class="tocnumber">1</span> <span class="toctext">DPG Versions</span></a></li>
+<li class="toclevel-1"><a href="#DPG_Header"><span class="tocnumber">2</span> <span class="toctext">DPG Header</span></a></li>
+<li class="toclevel-1"><a href="#Codecs"><span class="tocnumber">3</span> <span class="toctext">Codecs</span></a></li>
+<li class="toclevel-1"><a href="#Nintendo_DS_compatible_software"><span class="tocnumber">4</span> <span class="toctext">Nintendo DS compatible software</span></a></li>
+</ul>
+</td></tr></tbody></table>
+<a name="DPG_Versions" id="DPG_Versions"></a><h2> <span class="mw-headline"> DPG Versions </span></h2>
+<p>DPG exists in five versions, 0-4. The main changes in these versions are:
+</p>
+<ul><li> DPG1: Stereo audio
+</li><li> DPG2: A GOP file for faster searches in the video stream
+</li><li> DPG4: Thumbnail picture
+</li></ul>
+<a name="DPG_Header" id="DPG_Header"></a><h2> <span class="mw-headline"> DPG Header </span></h2>
+<p>The DPG file starts with a header:
+</p>
+<ul><li> DPG0-1 Header size 36
+<ul><li> 0-3: 'DPGX' where X is the version
+</li><li> 4-7: Number of frames in the video
+</li><li> 8-11: FPS
+</li><li> 12-15: Audio sample rate
+</li><li> 16-19: Number of audio channels (special for gsm:1/ogg:3)
+</li><li> 20-23: Audio start
+</li><li> 24-27: Audio size
+</li><li> 28-31: Video start
+</li><li> 32-35: Video size
+</li></ul>
+</li></ul>
+<ul><li> DPG2-3 additional GOP Header +12 = 48 (DPG2-3) or 52 (DPG4)
+<ul><li> 36-39: GOP start
+</li><li> 40-43: GOP size
+</li><li> 44-47: Pixel format: RGB15, RGB18, RGB21 or RGB24. (DPG1 writes this information at byte 36)
+</li></ul>
+</li></ul>
+<ul><li> DPG4: Thumbnail pictures, 
+<ul><li> 48-51 'THM0'
+</li><li> Thumbnail image size is 98304
+</li><li> Audio start 52 + 98304 = 98356
+</li></ul>
+</li></ul>
+<a name="Codecs" id="Codecs"></a><h2> <span class="mw-headline"> Codecs </span></h2>
+<p>Video stream:
+</p>
+<ul><li> Codec - mpeg1
+</li><li> Height - 192, could theoretically be as low as 16
+</li><li> Width - 256 
+</li><li> FPS - 15 
+</li></ul>
+<p>Audio stream:
+</p>
+<ul><li> Codec - mp2, gsm/ogg also possible
+</li><li> Bitrate 128
+</li><li> Sample rate 32000, higher possible but may result in worse quality
+</li></ul>
+<p>Thumbnail:
+</p>
+<ul><li> Codec - TGA, without header, 16 bit RGB values
+</li><li> Height - 192
+</li><li> Width - 256
+</li></ul>
+<p><br>
+</p>
+<a name="Nintendo_DS_compatible_software" id="Nintendo_DS_compatible_software"></a><h2> <span class="mw-headline"> Nintendo DS compatible software </span></h2>
+<p>The current version of dpg4x, has been tested with MoonShell 2.06. Older
+versions are supposed to work too, if you select the appropriate DPG version for
+your videos.
+</p><p>Videos encoded with dpg4x are known to work in other alternative DPG players, as
+those included with M3-DS cards, for example. To ensure better compatibility,
+it is recommended to encode your videos as DPG0 version, and to keep your DPG
+player as updated as possible.
+</p>
+		</div>
+	</div>
+</div>
+<div id="column-one">
+	<div id="p-cactions" class="portlet">
+		<h5>Views</h5>
+	</div>
+	<div class="portlet" id="p-logo">
+		<a style="background-image: url(Dpg4x_SidebarLogo.png);" href="https://sourceforge.net/projects/dpg4x/" title="Visit the main project page"></a>
+	</div>
+	<div class="generated-sidebar portlet" id="p-navigation">
+		<h5>Navigation</h5>
+		<div class="pBody">
+			<ul>
+				<li id="n-mainpage-description"><a href="index.html">Main Page</a></li>
+				<li id="n-user-guide"><a href="user-guide.html" title="How to use dpg4x">User Guide</a></li>
+				<li id="n-dpg"><b>DPG</b></li>
+				<li id="n-translations"><a href="translations.html" title="How to help us translate dpg4x">Translations</a></li>
+			</ul>
+		</div>
+	</div>
+		</div><!-- end of the left (by default at least) column -->
+			<div class="visualClear"></div>
+</div>
+
+</body></html>

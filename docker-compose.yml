@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "5001:5000"
+    environment:
+      - FLASK_ENV=development
+      - FLASK_HOST=0.0.0.0
+    volumes:
+      - ./backend:/app/backend:ro
+      - ./dpg4x:/app/dpg4x:ro
+      - ./test:/app/test:ro
+      - ./shared:/app/work/shared
+      - work_data:/app/work
+    tmpfs:
+      - /tmp
+    read_only: true
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - backend
+    tmpfs:
+      - /tmp
+      - /var/run
+      - /var/cache/nginx
+      - /var/log/nginx
+    read_only: true
+    restart: unless-stopped
+
+volumes:
+  work_data:

@@ -1,0 +1,129 @@
+
+                        #
+ #####   #####    ####  #    #   #    #
+ #    #  #    #  #    # #    #    #  #
+ #    #  #    #  #      #######    ##
+ #    #  #####   #  ###      #     ##
+ #    #  #       #    #      #    #  #
+ #####   #        ####       #   #    #
+
+
+
+##################
+# The dpg4x team #
+##################
+
+These are the people that make DPG for X possible.
+
+Tomas Aronsson
+d0malaga at gmail.com
+Maintainer
+
+Jean-François Campan (JFC)
+jeanfrancois.campan at gmail.com
+Translator
+
+María Castro
+Translator
+
+Marc P. Davignon
+mdavignon at ccib.mgh.harvard.edu
+Maintainer
+
+el_libre
+http://www.catmidia.cat
+Translator
+
+Félix Medrano (Xuko)
+xukosky at yahoo.es
+Maintainer
+
+
+###########
+# DPGConv #
+###########
+
+The encoding process used by dpg4x is based on the dpgconv script by Anton
+Romanov (theli). If you think dpg4x is just dpgconv + GUI, you would not be far
+wrong.
+
+http://theli.is-a-geek.org/blog/static/dpgconv
+
+
+########################
+# Exquisite icon theme #
+########################
+
+All the icons used by dpg4x, belong to the Exquisite icon theme. Included in
+kde-look under GPL license.
+
+Thank you to Mimin Ladha (original Xp_Mad icon set), Ghast (action icons),
+Guppetto (KDE port) and Nick Bargnesi (build script).
+
+http://kde-look.org/content/show.php?content=14788
+
+
+###########
+# Pexpect #
+###########
+
+DPG for X includes code from the pexpect library, by Noah Spurrier.
+
+Pexpect is a pure Python module that makes Python a better tool for controlling
+and automating other programs.
+
+http://www.noah.org/wiki/Pexpect
+
+
+####################
+# Gbadev.org forum #
+####################
+
+In the gbadev.org forum, Jaja and juhees announced the encoding of the first DPG
+video in Linux. A lot of code and ideas have been taken from here.
+
+Other contributors are: tepples, brian33x51, LunarCrisis, oofrab, bugmenot!,
+Firon, LS5, relaxed, steveox28, sinclair44, HyperHacker, jjlawren, mobad,
+Sigma83, shadowofdarkness, Mr. Pickesworth, weux, maya, techforumz, ninjalj,
+nornagon, Cartman!, D_S, NorQue and gspawn.
+
+http://forum.gbadev.org/viewtopic.php?t=7897
+
+
+########################
+# Elotrolado.net forum #
+########################
+
+In the elotrolado.net forum, werewolf released DpgEncoder, the first graphical
+application for encoding DPG video in Linux.
+
+Other contributors are: B4HamuT, David-Kun, lemus, Toz, DNKROZ, aiToRCiKi,
+ozrocpablo, kusanagi99, esnaque, rom_kurt, DKnight, Soed, Mariner_I, Ear3ndil,
+xyrer and jackjack.
+
+http://www.elotrolado.net/hilo_dpgencoder-para-linux-version-0-0_587415
+
+
+###############################
+# Additional Acknowledgements #
+###############################
+
+We reserve a special mention to all the code that dpg4x uses behind the scenes.
+Without them, the dpg4x project would not be affordable with the current
+available resources.
+
+Mplayer & Mencoder - http://www.mplayerhq.hu
+MPlayer is a movie player for Linux. MEncoder is a simple movie encoder,
+designed to encode MPlayer-playable movies to other MPlayer-playable formats.
+
+Python - http://www.python.org
+Python is a remarkably powerful dynamic programming language that is used in a
+wide variety of application domains.
+
+wxWidgets - http://wxwidgets.org
+wxWidgets is a library that gives its applications a truly native look and feel
+because it uses the platform's native API rather than emulating the GUI.
+
+Boa-Constructor - http://boa-constructor.sourceforge.net
+Boa Constructor is a cross platform Python IDE and wxPython GUI Builder.
+

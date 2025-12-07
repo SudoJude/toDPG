@@ -1,0 +1,15 @@
+#!/bin/sh
+# This file configures the paths used by dpg4x.
+
+# Path to the source files
+export DPG4X_SOURCE=/usr/share/dpg4x
+
+# Path to the icon files
+export DPG4X_ICONS=$DPG4X_SOURCE/dpg4x/icons
+
+# Path to the gettext resources
+export DPG4X_I18N=/usr/share/locale
+
+# Execute the python interpreter
+/usr/bin/env python "$DPG4X_SOURCE/dpg4x_main.py" "$@"
+

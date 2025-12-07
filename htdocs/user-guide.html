@@ -1,0 +1,276 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" dir="ltr" lang="en"><head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta http-equiv="Content-Style-Type" content="text/css">
+		<meta name="generator" content="MediaWiki 1.15.1">
+		<meta name="keywords" content="User Guide">
+		<title>SourceForge.net: User Guide - dpg4x</title>
+		<link rel="shortcut icon" href="dpg4x.ico">
+		<link rel="stylesheet" href="styles/shared.css" type="text/css" media="screen">
+		<link rel="stylesheet" href="styles/commonPrint.css" type="text/css" media="print">
+		<link rel="stylesheet" href="styles/main.css" type="text/css" media="screen">
+		<link rel="stylesheet" href="styles/index.css" type="text/css">
+    <link rel="stylesheet" type="text/css" href="styles/hosted.css" media="all">
+
+</head>
+<body class="mediawiki ltr ns-0 ns-subject page-User_Guide skin-sourceforge">
+<div id="sf_header">
+    <div class="sfh_n">
+        <ol class="sfh_n_ol">
+            <li class="sfh_n_li"><span><a href="https://sourceforge.net/" id="sf_logo"><strong>SourceForge</strong></a></span></li>
+            <li class="sfh_n_li"><span><a href="https://sourceforge.net/projects/dpg4x" title="Summary page hosted on SourceForge.net">Summary</a></span></li>
+            <li class="sfh_n_li"><span><a href="https://sourceforge.net/projects/dpg4x/files" title="Files available for download">Files</a></span></li>                            
+			<li class="sfh_n_li"><span><a href="https://sourceforge.net/projects/dpg4x/support">Support</a></span></li>
+        </ol>
+    </div>
+</div>
+
+	<div id="globalWrapper">
+		<div id="column-content">
+	<div id="content">
+		<a name="top" id="top"></a>
+				<h1 id="firstHeading" class="firstHeading">Dpg4x User Guide</h1>
+		<div id="bodyContent">
+			<h3 id="siteSub">From dpg4x</h3>
+			<div id="contentSub"></div>
+									<div id="jump-to-nav">Jump to: <a href="#column-one">navigation</a>, <a href="#searchInput">search</a></div>			<!-- start content -->
+			<table id="toc" class="toc" summary="Contents"><tbody><tr><td><div id="toctitle"><h2>Contents</h2> <span class="toctoggle"></span></div>
+<ul>
+<li class="toclevel-1"><a href="#The_MAIN_section"><span class="tocnumber">1</span> <span class="toctext">The MAIN section</span></a>
+<ul>
+<li class="toclevel-2"><a href="#Start_Encoding"><span class="tocnumber">1.1</span> <span class="toctext">Start Encoding</span></a></li>
+<li class="toclevel-2"><a href="#Preview_Modes"><span class="tocnumber">1.2</span> <span class="toctext">Preview Modes</span></a></li>
+<li class="toclevel-2"><a href="#Default_Settings_Vs_Individual_Settings"><span class="tocnumber">1.3</span> <span class="toctext">Default Settings Vs Individual Settings</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1"><a href="#The_VIDEO_section"><span class="tocnumber">2</span> <span class="toctext">The VIDEO section</span></a></li>
+<li class="toclevel-1"><a href="#The_AUDIO_section"><span class="tocnumber">3</span> <span class="toctext">The AUDIO section</span></a></li>
+<li class="toclevel-1"><a href="#The_SUBTITLES_section"><span class="tocnumber">4</span> <span class="toctext">The SUBTITLES section</span></a></li>
+<li class="toclevel-1"><a href="#The_MISC_section"><span class="tocnumber">5</span> <span class="toctext">The MISC section</span></a></li>
+<li class="toclevel-1"><a href="#OPTIONS"><span class="tocnumber">6</span> <span class="toctext">Command line options</span></a></li>
+</ul>
+</td></tr></tbody></table>
+<a name="The_MAIN_section" id="The_MAIN_section"></a><h2> <span class="mw-headline"> The MAIN section </span></h2>
+<p><img alt="File:Dpg4x_main.png" src="Dpg4x_main.png" border="0" height="356" width="555"></a>
+</p><p>If you run dpg4x, the first thing that you will see is the MAIN section. You can
+switch from one section to another with the icon-buttons at the top.
+</p><p>The MAIN section includes a list, with all the media sources that you want to
+encode. To add a media source to the list, use the <i>Add Media</i> button. This will
+enable the <i>Add File</i>, <i>Add DVD</i> and <i>Add VCD</i> buttons. To delete a media source
+from the list, select the media and use the <i>Delete Media</i> button. 
+</p><p>To add a file, just browse your file system and select it. It is also possible 
+to add files using drag-and-drop from a file manager. To add a DVD or a VCD
+you need to select the track and the disc reader device. When adding a DVD, you
+can filter by a range of chapters. Dpg4x cannot rip a DVD, only read non encrypted tracks.
+</p><p>The <i>Media Info</i> button gathers technical information about the selected media
+source. This can be useful to get the available audio and video tracks.
+</p><p>If the source file is a DPG file, the thumbnail and more DPG header information is shown. 
+This dialog also includes a function for replacing the thumbnail.
+<p><img alt="File:Dpg4x_media_info.png" src="Dpg4x_media_info.png" border="0" height="356" width="555"></a>
+</p></p>
+<a name="Start_Encoding" id="Start_Encoding"></a><h3> <span class="mw-headline"> <b>Start Encoding</b> </span></h3>
+<p>When you have completed the list, just use the <i>Start Encoding</i> button. If you
+want to setup the options for the encoding, you can select the DPG Version and
+the quality that you want to use. The DPG videos will be stored in the same
+folder as the original video files, but you can change this behaviour in the
+MISC section. This is a must when you are using DVD or VCD sources.
+</p>
+</p></p>
+If the source file already is a DPG file it will be converted to an AVI file
+without changing any video or audio streams. Encoding settings do not apply for
+DPG files.
+<a name="Preview_Modes" id="Preview_Modes"></a><h3> <span class="mw-headline"> <b>Preview Modes</b> </span></h3>
+<p>With the <i>Play Media</i> and <i>DPG Preview</i> buttons at the MAIN section you can
+play the media sources before encoding.
+</p><p>However, they work in a different way, while on the one hand "Play Media" just
+plays the media source "as is" using mplayer, the <i>DPG Preview</i> button encodes
+the beginning of the video, using the encoding settings you have selected, and
+then plays it as a DPG-like video. This is specially useful for testing your
+settings and seeing what your video would be like. You can setup the length of the
+preview from the MISC section.
+</p>
+<a name="Default_Settings_Vs_Individual_Settings" id="Default_Settings_Vs_Individual_Settings"></a><h3> <span class="mw-headline"> <b>Default Settings Vs Individual Settings</b> </span></h3>
+<p>When you need to adjust the encoding process to your needs, dpg4x offers two
+ways to configure it.
+</p><p>If you want your settings to be applied to all the videos you encode, you just
+need to switch to another section and adjust the default settings. Remember that
+all the sections are always available via the icon-buttons at the top.
+</p><p>If you want to set default settings for only one video (e.g. you may want to set
+a specific thumbnail or subtitles file), you can select the media source and
+press the <i>Set</i> button in the <i>Individual Settings</i> menu, at the bottom-right of
+the MAIN section. A popup window will be opened, showing the same options
+available in the default configuration sections, just perform the changes and
+press save. The default settings will no longer be used for that media source,
+only the settings you just set.
+</p><p>You can press <i>Set</i> again to perform another change or press <i>Delete</i> to delete
+the individual configuration for that media source. If you are not sure
+if a media source will use individual or default settings you can check it in
+the media sources list, in the MAIN section (second column).
+</p><p>Note: DPG files are converted to AVI without changing video/audio and do 
+not support individual settings.
+</p>
+<a name="The_VIDEO_section" id="The_VIDEO_section"></a><h2> <span class="mw-headline"> The VIDEO section </span></h2>
+<p><img alt="File:Dpg4x_video.png" src="Dpg4x_video.png" border="0" height="356" width="555"></a>
+</p><p>The VIDEO section includes the following video-related configurations:
+</p>
+<dl><dt> Width
+</dt><dd> Sets the width of the video. It is fixed to 256 at the moment,
+ because the current versions of MoonShell cannot deal with other 
+values.
+</dd></dl>
+<dl><dt> Height
+</dt><dd> Sets the height of the video. You can set any value between 32
+ and 192 or click on Keep Aspect to try to preserve the aspect ratio.
+</dd></dl>
+<dl><dt> Video Track
+</dt><dd> Because the DPG video format cannot store more than one video 
+track, you need to specify the track you want to encode in source videos
+ with more than one track. If you click on Auto Video Track, the default
+ track (usually the first) will be selected.
+</dd></dl>
+<dl><dt> Video Bitrate
+</dt><dd> This value determines the size of the output video. If you 
+increase this setting, you will increase the video quality of your 
+videos, but you will need more disk space to store them and they will be
+ slower to encode.
+</dd></dl>
+<dl><dt> Frames Per Second
+</dt><dd> Number of frames per second stored in the output video. Most users should leave Auto FPS checked.
+</dd></dl>
+<a name="The_AUDIO_section" id="The_AUDIO_section"></a><h2> <span class="mw-headline"> The AUDIO section </span></h2>
+<p><img alt="File:Dpg4x_audio.png" src="Dpg4x_audio.png" border="0" height="356" width="555"></a>
+</p><p>The AUDIO section includes the following audio-related configurations:
+</p>
+<dl><dt> Audio Codec
+</dt><dd> Codec used to encode the audio. Ogg vorbis and GSM audio were 
+valid options in the past, but the current versions of MoonShell (and 
+other alternative players) do not accept them, so now you can only 
+select MP2.
+</dd></dl>
+<dl><dt> Audio Track
+</dt><dd> Because the DPG video format cannot store more than one audio 
+track, you need to specify the track you want to encode in source videos
+ with more than one track. These tracks are usually related to with the 
+available languages in DVD sources or similar. Use the Media Info button
+ in the MAIN section to get the available tracks.
+</dd></dl>
+<dl><dt> Audio Bitrate
+</dt><dd> This value determines the size of the output video. If you 
+increase this setting, you will increase the audio quality of your 
+videos, but you will need more disk space to store them and they will be
+ slower to encode.
+</dd></dl>
+<dl><dt> Audio Frequency
+</dt><dd> In order to get the best compatibility with the NDS hardware, this setting must be set to 32000.
+</dd></dl>
+<dl><dt> Normalize Volume
+</dt><dd> Check this if you want to adjust the volume of your output files to a standard level.
+</dd></dl>
+<dl><dt> Force Mono Channel
+</dt><dd> This settings forces the encoded audio to be monaural (not 
+stereo). It is mandatory if you select DPG version 0 in the MAIN 
+section.
+</dd></dl>
+<a name="The_SUBTITLES_section" id="The_SUBTITLES_section"></a><h2> <span class="mw-headline"> The SUBTITLES section </span></h2>
+<p><img alt="File:Dpg4x_subtitles.png" src="Dpg4x_subtitles.png" border="0" height="356" width="555"></a>
+</p><p>Use the SUBTITLES section to create DPG video files with subtitles embedded. You can
+select different behaviours in the <b>Subtitles Source</b> combo:
+</p>
+<dl><dt> Auto
+</dt><dd> When Auto is selected as the Subtitles Source, dpg4x will try 
+to use an external subtitles file with the same name as the video file, 
+or the first subtitles track when available.
+</dd></dl>
+<dl><dt> Get track from input video file
+</dt><dd> If the source video contains one (or more) subtitles tracks, you can select a specific track in <b>Subtitles Track</b>.
+</dd></dl>
+<dl><dt> Use subtitles file
+</dt><dd> If you have a file that stores the subtitles (usually with the extensions .sub or .srt), you can set the path to that file in <b>Subtitles File</b>.
+</dd></dl>
+<dl><dt> Disable subtities
+</dt><dd> No subtitles will be embedded in the output file.
+</dd></dl>
+<p>Two more options are available to customize the resulting subtitles.
+</p>
+<dl><dt> Font
+</dt><dd> Character font used to render the characters in the embedded subtitles.
+</dd></dl>
+<dl><dt> Encoding
+</dt><dd> Character encoding used in the external subtitles files. Change this if the embedded subtitles include odd characters.
+</dd></dl>
+<a name="The_MISC_section" id="The_MISC_section"></a><h2> <span class="mw-headline"> The MISC section </span></h2>
+<p><img alt="File:Dpg4x_misc.png" src="Dpg4x_misc.png" border="0" height="356" width="555"></a>
+</p><p>The MISC section includes some useful configurations that are not included in the
+previous sections:
+</p>
+<dl><dt> Ouput Folder
+</dt><dd> By default, dpg4x stores the output DPG files in the same 
+folder where the source files are stored, but you can override this 
+behaviour here.
+</dd></dl>
+<dl><dt> Temporary Folder
+</dt><dd> Folder used to store temporary files. A valid folder must be set or the encoding process will fail.
+</dd></dl>
+<dl><dt> Select Thumbnail
+</dt><dd> When DPG version 4 is selected in the MAIN section, dpg4x 
+reads a random frame from the input video and uses it as the embedded 
+thumbnail. Here you can force dpg4x to use a image file as the 
+thumbnail. Most common image formats are supported: png, jpeg, gif, bmp,
+ etc.
+</dd></dl>
+<dl><dt> Preview size
+</dt><dd> Size of the DPG encoded video when you use the DPG Preview button in the MAIN section.
+</dd></dl>
+<dl><dt> Reset all configurations to the default values
+</dt><dd> All the individual settings will be deleted and the default settings will be restored to the initial values.
+</dd></dl>
+<a name="Options" id="OPTIONS"></a><h2> <span class="mw-headline">Command line options </span></h2>
+It is possible to give command line options and encode files without using the GUI. For Windows 
+there are two different exe files where the command line version is called: <code><b>Dpg4xConsole.exe</b></code>.
+</p><p>The <b>--dpg</b> option encodes video files into DPG format:
+<br><code><b>dpg4x --dpg input_file.avi</b></code>
+
+</p><p>This will create an DPG file called input_file.dpg or if that exists input_file~1.dpg. 
+The --dpg option will consider the options that have been set from the GUI, and either
+use the default ones or, if defined, the individual settings for each input file.
+
+</p><p>The <b>--avi</b> option changes the DPG video files to AVI format:
+<br><code><b>dpg4x --avi input_file.dpg</b></code>
+
+</p><p>This will create an AVI file called input_file.avi or if that exists input_file~1.avi. 
+The --avi option does not re-encode the video or the audio streams in the DPG
+file. It only performs changes in the container, so all the properties like
+framerate, video size, bitrates, quality, etc. will be the same.
+
+</p><p>The <b>--thumbnail</b> option can replace the thumbnail embedded in a DPG file. Note
+that files with DPG version 3 or less, cannot store a thumbnail. To use the script, you need 
+to set the image file: 
+<br><code><b>dpg4x --thumbnail=image_file.png file.dpg</b></code>
+</p><p>Most common image formats are supported: png, jpeg, gif, bmp, etc.
+
+		</div>
+	</div>
+</div>
+<div id="column-one">
+	<div id="p-cactions" class="portlet">
+		<h5>Views</h5>
+	</div>
+	<div class="portlet" id="p-logo">
+		<a style="background-image: url(Dpg4x_SidebarLogo.png);" href="https://sourceforge.net/projects/dpg4x/" title="Visit the main project page"></a>
+	</div>
+	<div class="generated-sidebar portlet" id="p-navigation">
+		<h5>Navigation</h5>
+		<div class="pBody">
+			<ul>
+				<li id="n-mainpage-description"><a href="index.html">Main Page</a></li>
+				<li id="n-user-guide"><b>User Guide</b></li>
+				<li id="n-dpg"><a href="dpg.html" title="Background information about the DPG format">DPG</a></li>
+				<li id="n-translations"><a href="translations.html" title="How to help us translate dpg4x">Translations</a></li>
+			</ul>
+		</div>
+	</div>
+		</div><!-- end of the left (by default at least) column -->
+			<div class="visualClear"></div>
+</div>
+
+</body></html>

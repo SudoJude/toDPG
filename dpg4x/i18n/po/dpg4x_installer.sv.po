@@ -1,0 +1,60 @@
+# Swedish translations for dpg4x package.
+# Copyright (C) 2012 THE dpg4x'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the dpg4x package.
+# Tomas Aronsson <d0malaga@users.sourceforge.net>, 2012.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: dpg 4x\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-09-13 21:08+0200\n"
+"PO-Revision-Date: 2012-09-13 21:35+0100\n"
+"Last-Translator: Tomas Aronsson <d0malaga@users.sourceforge.net>\n"
+"Language-Team: Swedish\n"
+"Language: sv\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: InstallerTranslations.py:44
+msgid "${Name} is already installed"
+msgstr "${Name} är redan installerad"
+
+#: InstallerTranslations.py:45
+msgid "Uninstall ${Name}"
+msgstr "Avinstallera ${Name}"
+
+#: InstallerTranslations.py:46
+msgid "${Name} on the web"
+msgstr "${Name} websida"
+
+#: InstallerTranslations.py:47
+msgid "Downloading MPlayer..."
+msgstr "Laddar ned MPlayer..."
+
+#: InstallerTranslations.py:48
+msgid "MPlayer was not successfully installed. Retry?"
+msgstr "MPlayer kunde inte installeras, nytt försök?"
+
+#: InstallerTranslations.py:49
+msgid "Failed to download MPlayer: '$R0'."
+msgstr "Kunde ej ladda ned MPlayer: '$R0'."
+
+#: InstallerTranslations.py:50
+msgid "Failed to install MPlayer, needed for encoding. Please install separately."
+msgstr "Kunde ej installera MPlayer som behövs för konvertering. Du behöver installera MPlayer separat."
+
+#: InstallerTranslations.py:51
+#: InstallerTranslations.py:95
+msgid "DPG encoder GUI - encodes videos for the Nintendo DS player moonshell"
+msgstr "Kodar om video till DPG - ett format som spelas av Nintendo DS mediaspelare moonshell"
+
+#: InstallerTranslations.py:94
+msgid "DPG4X Video Encoder"
+msgstr "Videokodaren DPG4X"
+
+#: InstallerTranslations.py:96
+msgid "Video Encoder"
+msgstr "Videokodare"
+
