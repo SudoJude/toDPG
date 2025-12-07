@@ -47,8 +47,13 @@ class EncoderService:
             import struct
             
             # 1. Prepare Output Path
-            output_dir = self.config_manager.get('GENERAL', 'other_output')
+            # Use source directory as output directory
+            output_dir = os.path.dirname(input_file)
+            
+            # (Optional) We could fallback to 'other_output' if source is not writable, 
+            # but user requested "same directory".
             if not os.path.exists(output_dir):
+                # Should not happen if input file exists
                 os.makedirs(output_dir)
             
             filename = os.path.basename(input_file)

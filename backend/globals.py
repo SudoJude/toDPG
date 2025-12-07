@@ -4,6 +4,7 @@ import sys
 # Application Paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 WORK_DIR = '/app/work'
+TEMP_DIR = os.path.join(WORK_DIR, 'tmp')
 USER_HOME = os.path.expanduser("~")
 CONFIG_DIR = os.path.join(WORK_DIR, ".dpg4x-web")
 CONFIG_FILE = os.path.join(CONFIG_DIR, "config.ini")
@@ -18,8 +19,7 @@ DEFAULT_CONFIG = {
         'dpg_version': '4',
         'dpg_quality': 'normal',
         'other_output': os.path.join(WORK_DIR, 'shared'),
-        'other_temporary': os.path.join(WORK_DIR, 'temp'),
-        'other_temporary': '/app/shared/temp',
+        'other_temporary': TEMP_DIR,
         'other_previewsize': '10',
     },
     'VIDEO': {

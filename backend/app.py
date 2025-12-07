@@ -6,7 +6,8 @@ from backend.config_manager import ConfigManager
 from backend.encoder_service import EncoderService
 from backend.preview_service import PreviewService
 from backend.thumbnail_service import ThumbnailService
-from backend.globals import WORK_DIR
+from backend.thumbnail_service import ThumbnailService
+from backend.globals import WORK_DIR, TEMP_DIR
 import builtins
 
 # Mock gettext for dpg4x legacy code
@@ -20,7 +21,7 @@ CORS(app) # Enable CORS for Angular frontend
 
 config_manager = ConfigManager()
 encoder_service = EncoderService(config_manager)
-preview_service = PreviewService(app.static_folder)
+preview_service = PreviewService(TEMP_DIR)
 thumbnail_service = ThumbnailService(config_manager)
 
 @app.route('/api/files', methods=['GET'])
@@ -158,13 +159,14 @@ def generate_preview():
     
     success, result = preview_service.generate_preview(path)
     if success:
-        # Return full URL or relative path that frontend can use
-        # Assuming frontend is served from same domain/port or proxy handles it.
-        # For dev, we might need full URL if ports differ.
-        # But let's return relative path and let frontend handle base URL.
-        return jsonify({"preview_url": f"/static/{result}"})
+        # Return URL relative to our new temp route
+        return jsonify({"preview_url": f"/api/temp/{result}"})
     else:
         return jsonify({"error": result}), 500
+
+@app.route('/api/temp/<path:filename>')
+def serve_temp(filename):
+    return send_file(os.path.join(TEMP_DIR, filename))
 
 @app.route('/api/dpg/thumbnail', methods=['GET'])
 def get_thumbnail():

@@ -10,8 +10,8 @@ if not hasattr(builtins, '_'):
 from dpg4x.DpgHeader import DpgHeader
 
 class PreviewService:
-    def __init__(self, static_folder):
-        self.preview_dir = os.path.join(static_folder, 'previews')
+    def __init__(self, temp_dir):
+        self.preview_dir = os.path.join(temp_dir, 'previews')
         if not os.path.exists(self.preview_dir):
             os.makedirs(self.preview_dir)
 
