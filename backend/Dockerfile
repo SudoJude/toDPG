@@ -3,6 +3,8 @@ FROM python:3.9-slim
 WORKDIR /app
 
 COPY backend/requirements.txt .
+RUN mkdir /app/test
+COPY ../test/dpg4x_example2.* /app/test
 
 RUN apt-get update && apt-get install -y \
     mplayer \
@@ -14,7 +16,6 @@ RUN apt-get update && apt-get install -y \
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY backend /app/backend
-COPY dpg4x /app/dpg4x
 
 # Set the python path to include the current directory so imports work correctly
 ENV PYTHONPATH=/app

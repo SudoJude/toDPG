@@ -1,5 +1,6 @@
 import os
 import sys
+import shutil
 
 # Application Paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -13,12 +14,19 @@ CONFIG_FILE = os.path.join(CONFIG_DIR, "config.ini")
 if not os.path.exists(CONFIG_DIR):
     os.makedirs(CONFIG_DIR)
 
+# Copy test files to use as a reference
+s = '/app/test'
+files = os.listdir(s)
+
+for fname in files:
+    shutil.copy(os.path.join(s, fname), WORK_DIR)
+
 # Default Configuration
 DEFAULT_CONFIG = {
     'GENERAL': {
         'dpg_version': '4',
         'dpg_quality': 'normal',
-        'other_output': os.path.join(WORK_DIR, 'shared'),
+        'other_output' : WORK_DIR,
         'other_temporary': TEMP_DIR,
         'other_previewsize': '10',
     },

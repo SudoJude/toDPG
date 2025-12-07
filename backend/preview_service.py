@@ -2,12 +2,11 @@ import os
 import subprocess
 import uuid
 import builtins
+from backend.dpg_header import DpgHeader
 
 # Mock gettext for dpg4x legacy code if not already mocked
 if not hasattr(builtins, '_'):
     builtins._ = lambda x: x
-
-from dpg4x.DpgHeader import DpgHeader
 
 class PreviewService:
     def __init__(self, temp_dir):

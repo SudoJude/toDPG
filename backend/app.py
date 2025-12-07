@@ -7,13 +7,12 @@ from backend.encoder_service import EncoderService
 from backend.preview_service import PreviewService
 from backend.thumbnail_service import ThumbnailService
 from backend.thumbnail_service import ThumbnailService
+from backend.dpg_header import DpgHeader
 from backend.globals import WORK_DIR, TEMP_DIR
 import builtins
 
 # Mock gettext for dpg4x legacy code
 builtins._ = lambda x: x
-
-from dpg4x.DpgHeader import DpgHeader
 
 app = Flask(__name__, static_folder='static')
 app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024 * 1024  # 1 Gigabyte
