@@ -78,6 +78,9 @@ Run locally (same commands CI uses):
 
 ```bash
 # build and start services in background
+# optionally copy .env.example to .env to override host port mappings
+# e.g. set BACKEND_HOST_PORT and FRONTEND_HOST_PORT
+cp .env.example .env 2>/dev/null || true
 docker compose -f docker-compose.yml up --build -d
 
 # show running services
