@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request, send_file
 from flask_cors import CORS
 import os
+from werkzeug.utils import secure_filename
 from backend.config_manager import ConfigManager
 from backend.config_manager import ConfigManager
 from backend.encoder_service import EncoderService
@@ -18,6 +19,30 @@ app = Flask(__name__, static_folder='static')
 app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024 * 1024  # 1 Gigabyte
 CORS(app) # Enable CORS for Angular frontend
 
+
+# Helper: normalize and validate a filesystem path coming from web requests.
+def _resolve_and_validate(path):
+    """
+    Normalize the provided path and ensure it resides inside WORK_DIR.
+    If `path` is relative, treat it as relative to WORK_DIR.
+    Returns the absolute normalized path or None if invalid/outside WORK_DIR.
+    """
+    if not path:
+        return None
+
+    # Treat relative paths as relative to WORK_DIR
+    if not os.path.isabs(path):
+        path = os.path.join(WORK_DIR, path)
+
+    # Normalize and get absolute path
+    p = os.path.abspath(os.path.normpath(path))
+    work_dir_abs = os.path.abspath(WORK_DIR)
+
+    # Ensure the path is inside WORK_DIR (allow equal to WORK_DIR)
+    if p == work_dir_abs or p.startswith(work_dir_abs + os.sep):
+        return p
+    return None
+
 config_manager = ConfigManager()
 encoder_service = EncoderService(config_manager)
 preview_service = PreviewService(TEMP_DIR)
@@ -26,12 +51,13 @@ thumbnail_service = ThumbnailService(config_manager)
 @app.route('/api/files', methods=['GET'])
 def list_files():
     path = request.args.get('path', WORK_DIR)
-    
-    # Security check: Ensure path is within WORK_DIR
-    if not path.startswith(WORK_DIR):
-        path = WORK_DIR
-        
-    if not os.path.exists(path):
+
+    # Normalize and validate the path; fall back to WORK_DIR on invalid input
+    resolved = _resolve_and_validate(path)
+    if resolved is None:
+        resolved = WORK_DIR
+
+    if not os.path.exists(resolved):
         return jsonify({"error": "Path does not exist"}), 404
 
     # Ensure WORK_DIR exists
@@ -40,7 +66,7 @@ def list_files():
     
     try:
         items = []
-        for entry in os.scandir(path):
+        for entry in os.scandir(resolved):
             items.append({
                 "name": entry.name,
                 "path": entry.path,
@@ -51,8 +77,8 @@ def list_files():
         items.sort(key=lambda x: (not x['is_dir'], x['name'].lower()))
         
         return jsonify({
-            "current_path": path,
-            "parent_path": os.path.dirname(path) if path != WORK_DIR else None,
+            "current_path": resolved,
+            "parent_path": os.path.dirname(resolved) if resolved != WORK_DIR else None,
             "items": items,
             "root_path": WORK_DIR
         })
@@ -64,6 +90,9 @@ def upload_file():
     path = request.form.get('path')
     if not path:
         return jsonify({"error": "Path required"}), 400
+    resolved = _resolve_and_validate(path)
+    if resolved is None:
+        return jsonify({"error": "Invalid target path"}), 403
         
     if 'file' not in request.files:
         return jsonify({"error": "No file provided"}), 400
@@ -73,8 +102,11 @@ def upload_file():
         return jsonify({"error": "No selected file"}), 400
         
     try:
-        # Save to target path
-        save_path = os.path.join(path, file.filename)
+        # Save to target path (use secure filename)
+        filename = secure_filename(file.filename)
+        save_path = os.path.join(resolved, filename)
+        # Ensure target directory exists
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
         file.save(save_path)
         return jsonify({"status": "success", "path": save_path})
     except Exception as e:
@@ -83,13 +115,11 @@ def upload_file():
 @app.route('/api/download', methods=['GET'])
 def download_file():
     path = request.args.get('path')
-    if not path or not os.path.exists(path):
+    resolved = _resolve_and_validate(path)
+    if not resolved or not os.path.exists(resolved):
         return jsonify({"error": "File not found"}), 404
-        
-    if not path.startswith(WORK_DIR):
-        return jsonify({"error": "Access denied"}), 403
-        
-    return send_file(path, as_attachment=True)
+
+    return send_file(resolved, as_attachment=True)
 
 @app.route('/api/config', methods=['GET'])
 def get_config():
@@ -105,10 +135,11 @@ def update_config():
 def convert():
     data = request.json
     input_file = data.get('file')
-    if not input_file or not os.path.exists(input_file):
+    resolved = _resolve_and_validate(input_file)
+    if not resolved or not os.path.exists(resolved):
         return jsonify({"error": "File not found"}), 400
     
-    success, message = encoder_service.start_encoding(input_file)
+    success, message = encoder_service.start_encoding(resolved)
     if success:
         return jsonify({"status": "started", "message": message})
     else:
@@ -130,12 +161,12 @@ def dpg_info():
     path = request.args.get('path')
     if not path:
         return jsonify({"error": "Path parameter is required"}), 400
-    
-    if not os.path.exists(path):
+    resolved = _resolve_and_validate(path)
+    if not resolved or not os.path.exists(resolved):
         return jsonify({"error": "File not found"}), 404
         
     try:
-        header = DpgHeader(path)
+        header = DpgHeader(resolved)
         return jsonify({
             "version": header.version,
             "frames": header.frames,
@@ -155,8 +186,11 @@ def generate_preview():
     path = data.get('path')
     if not path:
         return jsonify({"error": "Path parameter is required"}), 400
-    
-    success, result = preview_service.generate_preview(path)
+    resolved = _resolve_and_validate(path)
+    if not resolved:
+        return jsonify({"error": "Invalid path parameter"}), 400
+
+    success, result = preview_service.generate_preview(resolved)
     if success:
         # Return URL relative to our new temp route
         return jsonify({"preview_url": f"/api/temp/{result}"})
@@ -173,8 +207,12 @@ def get_thumbnail():
     if not path:
         return jsonify({"error": "Path parameter is required"}), 400
         
+    resolved = _resolve_and_validate(path)
+    if not resolved:
+        return jsonify({"error": "Invalid path parameter"}), 400
+
     try:
-        data, mimetype = thumbnail_service.get_thumbnail(path)
+        data, mimetype = thumbnail_service.get_thumbnail(resolved)
         if data is None:
             return jsonify({"error": "No thumbnail found"}), 404
             
@@ -188,6 +226,9 @@ def set_thumbnail():
     if not path:
         return jsonify({"error": "Path parameter is required"}), 400
         
+    resolved = _resolve_and_validate(path)
+    if not resolved:
+        return jsonify({"error": "Invalid path parameter"}), 400
     if 'image' not in request.files:
         return jsonify({"error": "No image file provided"}), 400
         
@@ -204,7 +245,7 @@ def set_thumbnail():
         temp_path = os.path.join(temp_dir, 'upload_thumb_' + file.filename)
         file.save(temp_path)
         
-        thumbnail_service.set_thumbnail(path, temp_path)
+        thumbnail_service.set_thumbnail(resolved, temp_path)
         
         # Cleanup
         if os.path.exists(temp_path):
