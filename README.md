@@ -1,5 +1,7 @@
 # DPG4x-Web
 
+dpg4x - ongoing web migration for the project https://sourceforge.net/p/dpg4x/master/ci/migration_web/tree/
+
 [![CI](https://github.com/d0malaga/dpg4x/actions/workflows/ci-docker-compose.yml/badge.svg?branch=migration_web)](https://github.com/d0malaga/dpg4x/actions/workflows/ci-docker-compose.yml)
 
 A modern web-based converter and manager for DPG video files (used by Nintendo DS homebrew players like Moonshell).
