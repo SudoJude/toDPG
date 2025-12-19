@@ -1,0 +1,9 @@
+# CodeQL configuration file
+# This file excludes the legacy dpgconv code which is kept for reference
+# but is not used by the web version and generates many false positives.
+
+name: "Python scan excluding legacy code"
+
+paths-ignore:
+  - 'org_dpg4x/**'
+  - '**/test/**'
