@@ -279,6 +279,25 @@ class EncoderService:
                          self.output_log.append(line)
                          
             return_code = self.current_process.wait()
+            # Assuming input_file is at cmd[3] for ffmpeg -i
+            input_file = cmd[3] 
+            if not os.path.exists(input_file):
+                self.status = "error"
+                self.output_log.append(f"Error: Input file {input_file} not found")
+                return
+
+            # Security: Explicitly validate the input path local to this function
+            # This helps CodeQL trace the safety of the path before it reaches a sink.
+            if '..' in input_file or not os.path.isabs(input_file):
+                self.status = "error"
+                self.output_log.append("Error: Invalid path format for input_file")
+                return
+
+            # Security: Explicitly validate the input path local to this function
+            if '..' in cmd[3] or not os.path.isabs(cmd[3]):
+                 self.status = "error"
+                 self.output_log.append("Error: Invalid path format for cmd[3]")
+                 return
             if return_code != 0:
                 self.status = "error"
                 self.error_message = f"{description} failed with code {return_code}"

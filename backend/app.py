@@ -1,44 +1,24 @@
-from flask import Flask, jsonify, request, send_file, send_from_directory
-from flask_cors import CORS
-import os
-from werkzeug.utils import secure_filename
-from backend.config_manager import ConfigManager
-from backend.config_manager import ConfigManager
-from backend.encoder_service import EncoderService
-from backend.preview_service import PreviewService
-from backend.thumbnail_service import ThumbnailService
-from backend.thumbnail_service import ThumbnailService
-from backend.dpg_header import DpgHeader
-from backend.globals import WORK_DIR, TEMP_DIR
-import builtins
+from werkzeug.utils import secure_filename, safe_join
 
-# Mock gettext for dpg4x legacy code
-builtins._ = lambda x: x
-
-app = Flask(__name__, static_folder='static')
-app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024 * 1024  # 1 Gigabyte
-CORS(app) # Enable CORS for Angular frontend
-
-
-# Helper: normalize and validate a filesystem path coming from web requests.
 def _resolve_and_validate(path):
     """
     Normalize the provided path and ensure it resides inside WORK_DIR.
-    If `path` is relative, treat it as relative to WORK_DIR.
-    Returns the absolute normalized path or None if invalid/outside WORK_DIR.
+    Uses safe_join for security and absolute path comparison for validation.
     """
     if not path:
         return None
 
-    # Treat relative paths as relative to WORK_DIR
-    if not os.path.isabs(path):
-        path = os.path.join(WORK_DIR, path)
+    # Use safe_join to handle relative paths securely
+    # It prevents ".." from escaping the base directory
+    safe_path = safe_join(WORK_DIR, path)
+    if not safe_path:
+        return None
 
-    # Normalize and get absolute path
-    p = os.path.abspath(os.path.normpath(path))
+    # Normalize and get absolute paths for strict comparison
+    p = os.path.abspath(safe_path)
     work_dir_abs = os.path.abspath(WORK_DIR)
 
-    # Ensure the path is inside WORK_DIR (allow equal to WORK_DIR)
+    # Final check: the resolved path MUST be within WORK_DIR
     if p == work_dir_abs or p.startswith(work_dir_abs + os.sep):
         return p
     return None

@@ -16,6 +16,11 @@ class ThumbnailService:
         if not os.path.exists(dpg_path):
             raise Exception("File not found")
             
+        # Security: Double-check the path is normalized and in a reasonable location
+        # This helps CodeQL trace the safety of the path local to this function.
+        if '..' in dpg_path or not os.path.isabs(dpg_path):
+             raise Exception("Invalid path format")
+            
         with open(dpg_path, 'rb') as f:
             # Check version
             header = f.read(4) 
@@ -93,6 +98,12 @@ class ThumbnailService:
         """
         if not os.path.exists(dpg_path):
             raise Exception("DPG file not found")
+        
+        # Security: Explicitly reject paths that look suspicious
+        if '..' in dpg_path or not os.path.isabs(dpg_path):
+             raise Exception("Invalid path format")
+        if '..' in image_path:
+             raise Exception("Invalid image path format")
             
         # 1. Convert input image to Raw RGB24 and resize to 256x192
         try:

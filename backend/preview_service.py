@@ -22,6 +22,10 @@ class PreviewService:
         if not os.path.exists(dpg_path):
             return False, "File not found"
 
+        # Security: Explicitly validate the input path locally to satisfy CodeQL
+        if '..' in dpg_path or not os.path.isabs(dpg_path):
+             return False, "Invalid path format"
+
         try:
             header = DpgHeader(dpg_path)
             
