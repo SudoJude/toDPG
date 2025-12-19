@@ -44,11 +44,22 @@ class ConfigManager:
         return config_dict
 
     def update_config(self, new_config):
+        # Security: Whitelist of allowed settings that can be updated via API
+        SAFE_OPTIONS = {
+            'GENERAL': {'dpg_quality', 'other_previewsize'},
+            'VIDEO': {'video_keepaspect', 'video_width', 'video_height', 'video_bitrate', 'video_fps', 'video_autofps', 'video_pixel'},
+            'AUDIO': {'audio_codec', 'audio_bitrate_mp2', 'audio_bitrate_vorbis', 'audio_frequency', 'audio_normalize', 'audio_mono'},
+            'SUBTITLES': {'subtitles_source', 'subtitles_track', 'subtitles_file', 'subtitles_font', 'subtitles_encoding'}
+        }
+
         for section, options in new_config.items():
+            if section not in SAFE_OPTIONS:
+                continue
             if not self.config.has_section(section):
                 self.config.add_section(section)
             for key, value in options.items():
-                self.config.set(section, key, str(value))
+                if key in SAFE_OPTIONS[section]:
+                    self.config.set(section, key, str(value))
         self.save_config()
 
     def get(self, section, key, fallback=None):

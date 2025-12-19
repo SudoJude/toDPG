@@ -59,31 +59,28 @@ class EncoderService:
             filename = os.path.basename(input_file)
             output_file = os.path.join(output_dir, os.path.splitext(filename)[0] + ".dpg")
             
-            # Temporary files
+            # Temporary files with unique names to prevent race conditions
+            job_id = os.urandom(8).hex()
             temp_dir = self.config_manager.get('GENERAL', 'other_temporary')
-            if not os.path.exists(temp_dir):
-                os.makedirs(temp_dir)
+            os.makedirs(temp_dir, exist_ok=True)
                 
-            audio_temp = os.path.join(temp_dir, 'temp_audio.mp2')
-            video_temp = os.path.join(temp_dir, 'temp_video.m1v')
-            thumb_temp = os.path.join(temp_dir, 'temp_thumb.raw')
+            audio_temp = os.path.join(temp_dir, f'audio_{job_id}.mp2')
+            video_temp = os.path.join(temp_dir, f'video_{job_id}.m1v')
+            thumb_temp = os.path.join(temp_dir, f'thumb_{job_id}.raw')
             
-            # Cleanup previous temp files
-            for f in [audio_temp, video_temp, thumb_temp]:
-                if os.path.exists(f): os.remove(f)
-
             # 2. Encode Audio
             self.output_log.append("Encoding Audio...")
             # DPG standard: MP2, 32000Hz, 2 channels, 128k
             audio_cmd = [
-                'ffmpeg', '-y', '-i', input_file, 
+                'ffmpeg', '-y', 
+                '-i', input_file, 
                 '-vn', 
                 '-c:a', 'mp2', 
                 '-ar', '32000', 
                 '-ac', '2', 
                 '-b:a', '128k', 
                 '-f', 'mp2', 
-                audio_temp
+                '--', audio_temp
             ]
             
             self._run_process(audio_cmd, "Audio Encoding")
@@ -93,14 +90,15 @@ class EncoderService:
             self.output_log.append("Encoding Video...")
             # DPG standard: MPEG1, 256x192, 24fps, 256k
             video_cmd = [
-                'ffmpeg', '-y', '-i', input_file,
+                'ffmpeg', '-y', 
+                '-i', input_file,
                 '-an',
                 '-c:v', 'mpeg1video',
                 '-s', '256x192',
                 '-r', '24',
                 '-b:v', '256k',
                 '-f', 'mpeg1video',
-                video_temp
+                '--', video_temp
             ]
             
             self._run_process(video_cmd, "Video Encoding")
@@ -110,12 +108,13 @@ class EncoderService:
             self.output_log.append("Generating Thumbnail...")
             # Extract one frame, resize to 256x192, raw RGB24
             thumb_cmd = [
-                'ffmpeg', '-y', '-i', input_file,
+                'ffmpeg', '-y', 
+                '-i', input_file,
                 '-vf', 'thumbnail,scale=256:192',
                 '-frames:v', '1',
                 '-f', 'rawvideo',
                 '-pix_fmt', 'rgb24',
-                thumb_temp
+                '--', thumb_temp
             ]
             self._run_process(thumb_cmd, "Thumbnail Generation")
             

@@ -119,7 +119,9 @@ def download_file():
     if not resolved or not os.path.exists(resolved):
         return jsonify({"error": "File not found"}), 404
 
-    return send_file(resolved, as_attachment=True)
+    directory = os.path.dirname(resolved)
+    filename = os.path.basename(resolved)
+    return send_from_directory(directory, filename, as_attachment=True)
 
 @app.route('/api/config', methods=['GET'])
 def get_config():

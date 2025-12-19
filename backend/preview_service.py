@@ -59,16 +59,20 @@ class PreviewService:
             # DPG video is usually standard MPEG-1 video, so we let ffmpeg detect it.
             # We don't force rawvideo.
             
+            # Transcode with FFmpeg
+            # Security: Ensure duration is a strict number and use '--' to prevent argument injection
+            clean_duration = str(int(duration))
+            
             cmd = [
                 'ffmpeg',
                 '-i', video_temp,
-                '-i', audio_temp, # FFmpeg usually auto-detects MP2 audio
+                '-i', audio_temp,
                 '-c:v', 'libx264',
                 '-preset', 'ultrafast',
                 '-c:a', 'aac',
-                '-t', str(duration),
+                '-t', clean_duration,
                 '-y',
-                output_file
+                '--', output_file
             ]
 
             process = subprocess.Popen(
