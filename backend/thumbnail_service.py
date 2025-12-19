@@ -102,7 +102,7 @@ class ThumbnailService:
                 '-vf', 'scale=256:192',
                 '-f', 'rawvideo',
                 '-pix_fmt', 'rgb24',
-                '-'
+                '--', '-'
             ]
             
             process = subprocess.Popen(
