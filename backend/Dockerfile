@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY backend/requirements.txt .
 RUN mkdir /app/test
-COPY ../test/dpg4x_example2.* /app/test
+COPY test/dpg4x_example2.* /app/test
 
 RUN apt-get update && apt-get install -y \
     mplayer \

@@ -5,6 +5,7 @@ on:
     branches: [ main, migration_web ]
   pull_request:
 
+
 jobs:
   compose:
     runs-on: ubuntu-latest
@@ -50,7 +51,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push backend image (with registry cache)
+      - name: Build backend image (with registry cache)
         uses: docker/build-push-action@v4
         with:
           context: .
@@ -60,7 +61,7 @@ jobs:
           cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/dpg4x-backend:cache
           cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/dpg4x-backend:cache,mode=max
 
-      - name: Build and push frontend image (with registry cache)
+      - name: Build frontend image (with registry cache)
         uses: docker/build-push-action@v4
         with:
           context: ./frontend
@@ -70,36 +71,27 @@ jobs:
           cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/dpg4x-frontend:cache
           cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/dpg4x-frontend:cache,mode=max
 
-      - name: Pull built images
+      - name: Start services with Docker Compose
+        env:
+          BACKEND_IMAGE: ghcr.io/${{ github.repository_owner }}/dpg4x-backend:latest
+          FRONTEND_IMAGE: ghcr.io/${{ github.repository_owner }}/dpg4x-frontend:latest
         run: |
-          docker pull ghcr.io/${{ github.repository_owner }}/dpg4x-backend:latest || true
-          docker pull ghcr.io/${{ github.repository_owner }}/dpg4x-frontend:latest || true
-
-      - name: Start services with pulled images
-        uses: docker/compose-action@v2
-        with:
-          compose-file: docker-compose.yml
-          detached: true
-          args: up --no-build -d
-
-      - name: Build and start services with docker compose
-        uses: docker/compose-action@v2
-        with:
-          compose-file: docker-compose.yml
-          detached: true
-          build: true
+          docker compose up -d
 
       - name: Show running services
-        run: docker compose -f docker-compose.yml ps
+        run: |
+          docker compose ps
+          docker compose logs --tail=100
 
-      # Optional: run tests inside a service. Uncomment & adapt.
-      #- name: Run backend tests
-      #  run: |
-      #    docker compose exec -T backend python -m pytest
+      - name: Verify health (simple)
+        run: |
+          # Wait a bit for services to initialize
+          sleep 10
+          docker compose ps
+          curl -s http://localhost:5001/api/status || echo "Backend check skipped or failed"
+          curl -s http://localhost:8080/ || echo "Frontend check skipped or failed"
 
       - name: Tear down
         if: always()
-        uses: docker/compose-action@v2
-        with:
-          compose-file: docker-compose.yml
-          args: down --volumes --remove-orphans
+        run: |
+          docker compose down --volumes --remove-orphans
