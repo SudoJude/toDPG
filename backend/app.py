@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, send_file
+from flask import Flask, jsonify, request, send_file, send_from_directory
 from flask_cors import CORS
 import os
 from werkzeug.utils import secure_filename
@@ -199,7 +199,7 @@ def generate_preview():
 
 @app.route('/api/temp/<path:filename>')
 def serve_temp(filename):
-    return send_file(os.path.join(TEMP_DIR, filename))
+    return send_from_directory(TEMP_DIR, filename)
 
 @app.route('/api/dpg/thumbnail', methods=['GET'])
 def get_thumbnail():
@@ -239,10 +239,10 @@ def set_thumbnail():
     try:
         # Save uploaded file temporarily
         temp_dir = config_manager.get('GENERAL', 'other_temporary')
-        if not os.path.exists(temp_dir):
-            os.makedirs(temp_dir)
+        os.makedirs(temp_dir, exist_ok=True)
             
-        temp_path = os.path.join(temp_dir, 'upload_thumb_' + file.filename)
+        safe_filename = secure_filename(file.filename)
+        temp_path = os.path.join(temp_dir, 'upload_thumb_' + safe_filename)
         file.save(temp_path)
         
         thumbnail_service.set_thumbnail(resolved, temp_path)
@@ -257,4 +257,5 @@ def set_thumbnail():
 
 if __name__ == '__main__':
     host = os.environ.get('FLASK_HOST', '0.0.0.0')
-    app.run(debug=True, host=host, port=5000)
+    debug = os.environ.get('FLASK_ENV') == 'development'
+    app.run(debug=debug, host=host, port=5000)
