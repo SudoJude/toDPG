@@ -1,0 +1,225 @@
+.\" .ig
+.\" dpg4x manual page.
+.\" 
+.\" Félix Medrano <xukosky@yahoo.es>, 2010.
+.\" 
+.\" This next line loads the www macro package so that the .URL macro can be used.
+.\" ..
+.\" .mso www.tmac
+.TH "DPG for X" "1" "12 October 2012"
+.SH "NAME"
+.
+dpg4x \- A GUI to encode videos into DPG format
+
+.
+.SH "SYNOPSIS"
+.
+.B dpg4x
+\fI[Options]\fR \fIfile1\fR \fI[file2]\fR \fI[...]\fR (starts GUI if no options given)
+
+.
+.SH "DESCRIPTION"
+.
+Dpg4x is a program that tries to make the DPG video creation as easy as possible.
+A DPG video is the video format that you need if you want to play movies on your Nintendo DS.
+
+You can also encode the DPG video files to AVI format or replace the thumbnail image
+embedded in a DPG4 video.
+
+Dpg4x relies on mplayer/mencoder to do it's work, so any video file playable
+with mplayer can be converted to DPG. 
+
+.
+.SH "FEATURES"
+ \- Simple GUI suitable for beginners.
+ \- Includes lots of options for the advanced user.
+ \- Command line options to encode videos from batch jobs.
+ \- Supports individual per-media settings when needed.
+ \- Multiple DPG version support, from DPG0 to DPG4.
+ \- Can process any video file playable by mplayer.
+ \- Encodes your DVD and VCD directly.
+ \- Includes subtitles support.
+ \- Ability to preview the encoding settings.
+ \- Drag and drop support from your favourite file manager.
+ \- Batch processing.
+ \- Multiplatform.
+ \- Multilanguage.
+
+.SH "USAGE"
+.
+.TP
+.B Media Sources List
+.
+If you run dpg4x, the first thing that you will see is the MAIN section. You can
+switch from one section to another with the icon-buttons at the top.
+
+The MAIN section includes a list, with all the media sources that you want to
+encode. To add a media source to the list, use the "Add Media" button. This will
+enable the "Add File", "Add DVD" and "Add VCD" buttons. To delete a media source
+from the list, select the media and use the "Delete Media" button. 
+
+To add a file, just browse your file system and select it. It is also possible 
+to add files using drag-and-drop from a file manager. To add a DVD or a VCD
+you need to select the track and the disc reader device. When adding a DVD, you
+can filter by a range of chapters.
+
+The Media Info button gathers technical information about the selected media
+source. This can be useful to get the available audio and video tracks.
+
+If the source file is a DPG file, the thumbnail and more DPG header information is shown. 
+This dialog also includes a function for replacing the thumbnail.
+
+.TP
+.B Start Encoding
+.
+When you have completed the list, just use the "Start Encoding" button. If you
+want to setup the options for the encoding, you can select the DPG Version and
+the quality that you want to use. The DPG videos will be stored in the same
+folder as the original video files, but you can change this behaviour in the
+MISC section. This is a must when you are using DVD or VCD sources.
+
+If the source file already is a DPG file it will be converted to an AVI file
+without changing any video or audio streams. Encoding settings do not apply for
+DPG files.
+
+.TP
+.B Preview Modes
+.
+With the "Play Media" and "DPG Preview" buttons at the MAIN section you can
+play the media sources before encoding.
+
+However, they work in a different way, while on the one hand "Play Media" just
+plays the media source "as is" using mplayer, the "DPG Preview" button encodes
+the beginning of the video, using the encoding settings you have selected, and
+then plays it as a DPG-like video. This is specially useful for testing your
+settings and seeing how your video would like. You can setup the length of the
+preview from the MISC section.
+
+.TP
+.B Default Settings
+.
+When you need to adjust the encoding process to your needs, dpg4x offers two
+ways to configure it.
+
+If you want your settings to be applied to all the videos you encode, you just
+need to switch to another section and adjust the default settings. Remember that
+all the sections are always available via the icon-buttons at the top.
+
+The VIDEO section includes advanced video options. e.g. You can change the video
+bitrate, and the FPS. In the AUDIO section you can select the audio track to
+encode and adjust the audio quality. The SUBTITLES section includes all the
+options you need to add subtitles to the videos, and the MISC section includes
+the options that didn't fit in the other sections, like the tmp folder that
+dpg4x uses.
+
+.TP
+.B Individual Settings
+.
+If you want to set default settings for only one video (e.g. you may want to set
+a specific thumbnail or subtitles file), you can select the media source and
+press the "Set" button in the "Individual Settings" menu, at the bottom-right of
+the MAIN section. A popup window will be opened, showing the same options
+available in the default configuration sections, just perform the changes and
+press save. The default settings will no longer be used for that media source,
+only the settings you just set.
+
+You can press "Set" again to perform another change or press "Delete" to delete
+the individual configuration for that media source. If you are not sure about
+if a media source will use individual or default settings you can check it in
+the media sources list, in the MAIN section (second column).
+
+Note: DPG files are converted to AVI without changing video/audio and do 
+not support individual settings.
+.TP
+.B Default Subtitles
+.
+If you have problems when adding subtitles to your videos, just include a
+subtitles file in the folder where the original video file is. The name of the
+subtitles file must be the same as the video file, except the extension. To
+check that everything is ok, just play the video file with mplayer (e.g. with
+the "Preview" button). As the last step, don't forget to switch to the SUBTITLES
+section and select "Auto" as the subtitles source.
+
+.
+.SH "OPTIONS"
+.
+.TP
+.B The --dpg option
+.
+The --dpg option encodes video files into DPG format:
+.br
+.I dpg4x --dpg input_file.avi 
+
+This will create an DPG file called input_file.dpg or if that exists input_file~1.dpg.
+
+The --dpg option will consider the options that have been set from the GUI, and either
+use the default ones or, if defined, the individual settings for each input file.
+
+.TP
+.B The --avi option
+.
+The --avi option changes the DPG video files to AVI format:
+.br
+.I dpg4x --avi input_file.dpg 
+
+This will create an AVI file called input_file.avi or if that exists input_file~1.avi.
+
+The --avi option does not re-encode the video or the audio streams in the DPG
+file. It only performs changes in the container, so all the properties like
+framerate, video size, bitrates, quality, etc. will be the same.
+
+.TP
+.B The --thumbnail option
+.
+The --thumbnail option can replace the thumbnail embedded in a DPG file. Note
+that files with DPG version 3 or less, cannot store a thumbnail.
+
+To use the script, you need to set the image file. For
+example:
+.br
+.I dpg4x --thumbnail=image_file.png file.dpg 
+
+Most common image formats are supported: png, jpeg, gif, bmp, etc.
+
+The GUI is started if no options are given.
+.
+.SH "FILES"
+.
+When you use dpg4x, it stores the current configuration in your home folder. The
+full path of the configuration directory is:
+.br
+.I ~/.config/dpg4x/
+
+The next time dpg4x is opened, it will restore the last saved configuration. You
+can delete the configuration files to reset the default or the individual media
+settings. But you should not edit the configuration file by hand. The default
+settings are stored in a file named config.ini
+
+You can also reset all the configuration to the default values by pressing the
+"Reset to default" button in the MISC section.
+
+The --avi option does not read the dpg4x configuration files. It stores the temporary
+files in the output directory.
+.
+.SH "BUGS"
+.
+If you find a bug in dpg4x, please report it via the tracker:
+.br
+.UR http://sourceforge.net/projects/dpg4x/support
+http://sourceforge.net/projects/dpg4x/support
+
+Or email to a maintainer in order to get support. See the CREDITS file for
+details. 
+.
+.SH "AUTHORS"
+.
+The credits file for DPG for X is available here:
+.br
+.I /usr/share/doc/dpg4x/CREDITS
+.
+.SH "SEE ALSO"
+.
+.UR http://sourceforge.net/projects/dpg4x/
+http://sourceforge.net/projects/dpg4x/
+.P
+.

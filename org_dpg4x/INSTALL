@@ -1,0 +1,115 @@
+
+                        #
+ #####   #####    ####  #    #   #    #
+ #    #  #    #  #    # #    #    #  #
+ #    #  #    #  #      #######    ##
+ #    #  #####   #  ###      #     ##
+ #    #  #       #    #      #    #  #
+ #####   #        ####       #   #    #
+
+
+NOTE: Some information included in this file is specific to Linux, if you are
+using Windows or OS X, please read also the INSTALL.win or INSTALL.osx files.
+
+
+DEPENDENCIES
+
+dpg4x needs the following packages to be available on your system. Also note
+that all the dependent programs must be accessible via the PATH.
+
+Old - Valid around 2010:
+python (2.5)
+python-wxversion (2.8)
+python-wxgtk (2.8)
+mplayer (1:1.0)
+mencoder (1:1.0)
+
+2020 - Fedora 32:
+python (3.8)
+python3-wxpython4 (4.0.7)
+python3-pillow (7.0.0)
+mplayer (1.4-10)
+mencoder (1.4-10)
+Still Todo:
+* Fix AddSpacer
+* Installers
+** Improve Ubuntu deb packaging
+** Windows packaging
+* More complete testing
+** Ideally with some basic automation....
+
+Build rpm:
+dist/rpm/build_fedora.sh
+
+2020 - Ubuntu 20
+
+tomasa@ubuntu20:~/src/dpg4x-git$ apt list mencoder mplayer python3-wxgtk4.0 python3-pil
+Listing... Done
+mencoder/focal,now 2:1.3.0-8build5 amd64 [installed]
+mplayer/focal,now 2:1.3.0-8build5 amd64 [installed]
+python3-pil/focal,now 7.0.0-4build1 amd64 [installed]
+python3-wxgtk4.0/focal,now 4.0.7+dfsg-2build1 amd64 [installed]
+
+Build deb package by typing:
+debuild -i -us -uc -b 
+
+Versions in brackets include those that dpg4x has been tested with, but others 
+may work too.
+
+The following packages are not mandatory, but dpg4x can take advantage of them,
+when they are present. If we were talking about packages, these are the packages
+that the dpg4x package would recommend.
+
+mpeg_stat (2.2) - provides a faster and more tested way of generating headers.
+iconv (2.9) - necessary if you want to change the encoding for subtitles.
+python-imaging (1.1.7) - provides antialiased downsampling for thumbnails.
+
+If you can't find mpeg_stat for your system, try this URL:
+http://ftp.sunet.se/pub/multimedia/Berkeley/mpeg/stat/
+
+
+NINTENDO DS COMPATIBLE SOFTWARE
+
+The current version of dpg4x, has been tested with MoonShell 2.06. Older
+versions are supposed to work too, if you select the appropriate DPG version for
+your videos.
+
+Videos encoded with dpg4x are known to work in other alternative DPG players, as
+those included with M3-DS cards, for example. To ensure better compatibility,
+it is recommended to encode your videos as DPG0 version, and to keep your DPG
+player as updated as possible.
+
+
+INSTALLATION
+
+Since dpg4x is written in python, you only need to extract the source folder
+anywhere on your system. Then, execute the dpg4x script and enjoy.
+
+If the program does not start, run it from a console and check the output.
+
+
+CUSTOMIZING THE INSTALLATION
+
+You can use different paths for every file type included with dpg4x. This may
+be useful, e.g. if you want to create a software package for your Linux
+distribution.
+
+In order to enable this feature, you just need to edit the dpg4x file. This file
+is an executable shell script, and declares the following variables:
+
+DPG4X_SOURCE. Path to the dpg4x source (.py, .pyc) files.
+DPG4X_ICONS. Path to the icon files.
+DPG4X_I18N. Path to the gettext resources.
+
+The programs that dpg4x wraps (mplayer, mencoder, mpeg_stat and iconv) are
+accessed via the PATH variable. You can also select the python interpreter to
+use, as it is specified in the last line of the script.
+
+Note that the dpg4x script file itself, should be included in your system's
+PATH, in order to be accessible. 
+
+If you want to include an entry for dpg4x in your menu, you can use the icon
+files named dpg4x_XX.png. Just an idea: you may link them as standard icon
+resources in /usr/share/icons...
+
+

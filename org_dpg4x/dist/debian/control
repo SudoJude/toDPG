@@ -1,0 +1,34 @@
+Source: dpg4x
+Section: graphics
+Priority: optional
+Maintainer:  Félix Medrano <xukosky@users.sourceforge.net>
+Uploaders: Tomas Aronsson <d0malaga@users.sourceforge.net>
+#Build-Depends: debhelper (>= 9.0.0), python-support (>= 0.90.0)
+Build-Depends: debhelper (>= 9.0.0), python-dev, dh-python (>=4.0)
+XS-Python-Version: >= 3.8
+Standards-Version: 4.5.0.2
+
+Package: dpg4x
+Architecture: all
+Homepage: http://sourceforge.net/projects/dpg4x/
+Depends: ${misc:Depends}, ${python3:Depends}, python3-pil, python3-wxgtk4.0, mplayer (>= 1.3), mencoder (>= 1.3)
+Suggests: 
+Description: GUI to encode files into the DPG video format
+ DPG for X allows the easy creation of DPG video files. A DPG video is
+ the video format that you need if you want to play movies on your
+ Nintendo DS.
+ .
+ It features:
+  - Simple GUI suitable for beginners.
+  - Includes lots of options for the advanced user.
+  - Command line options to encode videos from batch jobs.
+  - Supports individual per-media settings when needed.
+  - Multiple DPG version support, from DPG0 to DPG4.
+  - Can process any video file playable by mplayer.
+  - Encodes your DVD and VCD directly.
+  - Includes subtitles support.
+  - Ability to preview the encoding settings.
+  - Drag and drop support from your favourite file manager.
+  - Batch processing.
+  - Multiplatform.
+  - Multilanguage.

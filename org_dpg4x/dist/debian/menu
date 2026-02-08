@@ -1,0 +1,3 @@
+?package(dpg4x):needs="X11" section="Applications/Video"\
+  title="DPG for X" command="/usr/bin/dpg4x"\
+  icon="/usr/share/pixmaps/dpg4x.xpm"

@@ -1,0 +1,24 @@
+#!/bin/sh
+
+# This file configures the paths used by dpg4x.
+# You can modify to suit your needs. 
+# Read the INSTALL file for more details.
+
+# Get the folder for default installation
+OLD_DIR=`pwd`
+cd `dirname $0`
+DPG4X_BASE=`pwd`
+cd "$OLD_DIR"
+
+# Path to the source files
+export DPG4X_SOURCE=$DPG4X_BASE
+
+# Path to the icon files
+export DPG4X_ICONS=$DPG4X_BASE/dpg4x/icons
+
+# Path to the gettext resources
+export DPG4X_I18N=$DPG4X_BASE/dpg4x/i18n
+
+# Execute the python interpreter
+#/usr/bin/env python3 "$DPG4X_SOURCE/Dpg4x.py" "$@"
+/usr/bin/env python3 "$DPG4X_SOURCE/dpg4x_main.py" "$@"

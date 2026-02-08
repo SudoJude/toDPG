@@ -1,0 +1,58 @@
+
+                        #
+ #####   #####    ####  #    #   #    #
+ #    #  #    #  #    # #    #    #  #
+ #    #  #    #  #      #######    ##
+ #    #  #####   #  ###      #     ##
+ #    #  #       #    #      #    #  #
+ #####   #        ####       #   #    #
+
+
+NOTE: This file is outdated and only includes information that was specific
+for OS X around 2011, please refer to the INSTALL file for general information
+about installing dpg4x.
+
+To get dpg4x up and running on MacOSX you will need to install the
+following dependencies:
+
+a. Python 2.6.1 and wxPython 2.8.8.1 are preinstalled on MacOSX 10.6.4 while
+Python 2.5.1 and wxPython 2.8.4.0 are preinstalled on MacOSX 10.5.8 so nothing
+needs to be done with these.
+
+b. Getting mencoder installed is the tricky bit. There are several Mac binaries
+available for mplayer (not mencoder) but most are quite dated and do not work
+properly with dpg4x. So I tested the Mac Fink version of mplayer and mencoder.
+http://www.finkproject.org/download/
+
+c. Fink installs some items from precompiled binary packages but most items are
+compiled from source. Fortunately, this does not matter all that much since Fink
+does the heavy lifting either way. You need to install Xcode Tools from Apple
+which is a rather large and time consuming install but the package is free and
+may come in handy for other things in the future.
+http://connect.apple.com/
+
+d. Once Xcode is installed follow the instructions on this page
+http://www.finkproject.org/download/srcdist.php to install Fink on 10.6 or 10.5,
+also a large and time consuming process. Between Xcode and Fink you'll need
+about 4-5GB of disk space just to compile mplayer and mencoder on your system.
+Unless you can find a fairly new binary version (1.0rc2-4.2.1) of mplayer and
+mencoder some where.
+
+e. Do all the install steps listed but add the following commands to install
+mplayer (mencoder is a part of the same install). Unfortunately, mplayer is
+considered an unstable package which requires a few extra steps.
+ea. vi /sw/etc/fink.conf
+eb. Make sure the Trees: line reads like the following: Trees: local/main
+stable/main stable/crypto unstable/main unstable/crypto
+ec. fink selfupdate-cvs
+ed. fink index -f
+ee. fink install mplayer
+
+f. Download essential-macosx-x86-20060611.zip from
+http://www.mplayerhq.hu/MPlayer/releases/codecs/ unzip, install, and then run:
+ln -s /usr/local/lib/codecs /sw/lib/codecs
+
+g. Install dpg4x and run as you would on Linux. Read the INSTALL file for more
+details.
+
+

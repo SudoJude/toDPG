@@ -1,0 +1,15 @@
+*~
+build/
+dpg4x-python/
+dpg4x.egg-info/
+.vs/
+*.log
+*.spec
+dist/debian/dpg4x*
+dist/debian/files
+__pycache__
+dist/dpg4x*
+dist/debian/debhelper*
+dist/debian/.debhelper
+MANIFEST
+node_modules

@@ -1,0 +1,18 @@
+# Gettext message catalog for dpg4x.
+# Copyright (C) 2010
+# This file is distributed under the same license as the dpg4x package.
+# Félix Medrano Sanz <xukosky at yahoo.es> 2010
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2010-08-25 19:52+0200\n"
+"PO-Revision-Date: 2010-08-25 19:52+0200\n"
+"Last-Translator: xukosky\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# Catalog not required for english, dummy file.
+# This file exists just to avoid the warning at the startup.
+

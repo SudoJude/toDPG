@@ -1,0 +1,58 @@
+# Gettext message catalog for dpg4x.
+# Copyright (C) 2012
+# This file is distributed under the same license as the dpg4x package.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-09-13 21:08+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: InstallerTranslations.py:44
+msgid "${Name} is already installed"
+msgstr ""
+
+#: InstallerTranslations.py:45
+msgid "Uninstall ${Name}"
+msgstr ""
+
+#: InstallerTranslations.py:46
+msgid "${Name} on the web"
+msgstr ""
+
+#: InstallerTranslations.py:47
+msgid "Downloading MPlayer..."
+msgstr ""
+
+#: InstallerTranslations.py:48
+msgid "MPlayer was not successfully installed. Retry?"
+msgstr ""
+
+#: InstallerTranslations.py:49
+msgid "Failed to download MPlayer: '$R0'."
+msgstr ""
+
+#: InstallerTranslations.py:50
+msgid ""
+"Failed to install MPlayer, needed for encoding. Please install separately."
+msgstr ""
+
+#: InstallerTranslations.py:51 InstallerTranslations.py:95
+msgid "DPG encoder GUI - encodes videos for the Nintendo DS player moonshell"
+msgstr ""
+
+#: InstallerTranslations.py:94
+msgid "DPG4X Video Encoder"
+msgstr ""
+
+#: InstallerTranslations.py:96
+msgid "Video Encoder"
+msgstr ""

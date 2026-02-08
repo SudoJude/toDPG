@@ -1,0 +1,71 @@
+
+                        #
+ #####   #####    ####  #    #   #    #
+ #    #  #    #  #    # #    #    #  #
+ #    #  #    #  #      #######    ##
+ #    #  #####   #  ###      #     ##
+ #    #  #       #    #      #    #  #
+ #####   #        ####       #   #    #
+
+2020-08-06 dpg4x 3.0
+    * Migration to newer frameworks (Python3, wxpython4, mplayer/mencoder 1.4)
+    * Tested platforms
+	** Windows 10 (and also tested on Windows XP, no longer supported)
+	** Fedora 32
+	** Ubunutu 20.04
+	** DPG videos verified on a Nintendo DS with Moonshell 2.10
+
+2012-10-14 dpg4x 2.3
+    * New language available: French.
+    * Support for DPG files: info window with thumbnail replace button, show video, converto to AVI.
+    * Added input arguments to Dpg4x to be able to create dpg files from a batch job.
+    * The dpg2avi and dpgimginjector scripts have been merged with the main program.
+    * A new help button opens the user guide in the default web browser.
+    * Fixed bug 3556834 - Old Windows mplayer download has been moved to other location.
+
+2011-09-06 dpg4x 2.2
+    * The new dpgimginjector script can replace the thumbnail image 
+      embedded in a DPG file.
+    * Thumbnail support improved. Optional antialiasing with PIL.
+    * The Windows installer can handle updates.
+    * Fixed bug 3306088.
+
+2011-04-10 dpg4x 2.1
+    * New language available: Swedish.
+    * Windows support heavily improved.
+    * Project sources adapted for an easier package creation.
+    * deb package available.
+    * rpm package available.
+    * Installer for Windows based on NSIS available.
+    * New button to reset all configurations to the default values.
+    * Better integration with some versions of mencoder (like Fedora's).
+    * Lots of bug fixes.
+
+2010-11-12 dpg4x 2.0
+    * DPG for X can now be executed in Windows and MacOSX.
+    * Support for individual media settings.
+    * New language available: Catalan.
+    * Lots and lots of other minor enhancements and bug fixes.
+
+2010-08-25 dpg4x 1.2
+    * The new dpg2avi script can convert DPG files to AVI format.
+    * Added a "Media Info" button to gather information about sources.
+    * Experimental OGG and GSM audio support. Disabled by default.
+    * Various bug fixes.
+
+2010-06-20 dpg4x 1.1.1
+    * Fixed bug 3011287 - GUI does not scale.
+
+2010-05-29 dpg4x 1.1
+    * You can now use Dvd and Vcd as media sources. 
+    * The preview button now plays a real preview of the encoded file.
+      You can setup the preview's size from the misc settings.
+      The old behaviour is still available via the play button.
+    * Fixed some bugs in the localization and subtitle's code.
+    * Track values adjusted based on mplayer's documentation.
+    * Added a new track setup for video.
+    * DPG version 0 now only supports mono audio.
+
+2010-02-05 dpg4x 1.0
+    * First public release.
+

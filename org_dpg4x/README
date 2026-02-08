@@ -1,0 +1,62 @@
+
+                        #
+ #####   #####    ####  #    #   #    #
+ #    #  #    #  #    # #    #    #  #
+ #    #  #    #  #      #######    ##
+ #    #  #####   #  ###      #     ##
+ #    #  #       #    #      #    #  #
+ #####   #        ####       #   #    #
+
+
+1. INTRODUCTION
+
+Dpg4x is a program that tries to make the DPG video creation as easy as possible
+on Linux. Since version 2.0 it also runs on Windows and OS X.
+
+If you are reading this, I suppose you already know what a DPG video is, so I'll
+be brief. A DPG video is the video format that you need if you want to play
+movies on your Nintendo DS.
+
+Dpg4x relies on mplayer/mencoder to do it's work, so any video file playable
+with mplayer can be converted to DPG. Check the INSTALL file for more details
+about dependencies and installation.
+
+
+2. FEATURES
+
+ - Simple GUI suitable for beginners.
+ - Includes lots of options for the advanced user.
+ - Command line options to encode videos from batch jobs.
+ - Supports individual per-media settings when needed.
+ - Multiple DPG version support, from DPG0 to DPG4.
+ - Can process any video file playable by mplayer.
+ - Encodes your DVD and VCD directly.
+ - Includes subtitles support.
+ - Ability to preview the encoding settings.
+ - Drag and drop support from your favorite file manager.
+ - Batch processing.
+ - Multiplatform.
+ - Multilanguage.
+
+3. USAGE
+
+Usage: dpg4x [options] file1 file2... (starts GUI if no options)
+
+Options:
+  -h, --help        show this help message and exit
+  --thumbnail=FILE  use image file as thumbnail in DPG files
+  --dpg             convert files to DPG, using settings from GUI
+  --avi             convert DPG files to AVI, no transformation
+
+Please see the man page or online documentation for more usage information.
+URL: http://dpg4x.sourceforge.net/user-guide.html
+
+4. BUGS
+
+If you find a bug in dpg4x, please report it via the tracker:
+
+http://sourceforge.net/projects/dpg4x/support
+
+Or email to a maintainer in order to get support. See the CREDITS file for
+details. 
+

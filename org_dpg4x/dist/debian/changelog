@@ -1,0 +1,32 @@
+dpg4x (3.0-1) focal; urgency=low
+
+  * Changes Migration to Ubuntu20, Python3, wxpython4, mplayer/mencoder 1.3)
+
+ -- Tomas Aronsson <d0malaga@users.sourceforge.net>  Thu,  06 Aug 2020 21:25:00 +0100
+
+dpg4x (2.3-1) unstable; urgency=low
+
+  * Removed Dpg2Avi and DpgImginjector scripts, now included in dpg4x
+
+ -- Félix Medrano <xukosky@yahoo.es>  Mon,  10 Sep 2012 21:25:00 +0100
+
+dpg4x (2.2-1) unstable; urgency=low
+
+  * The package recomends python-imaging
+  * Added dpgimginjector script
+
+ -- Félix Medrano <xukosky@yahoo.es>  Tue,  30 Aug 2011 18:36:15 +0100
+
+dpg4x (2.1-1) unstable; urgency=low
+
+  * Changes in the folder structure
+  * Manpage and desktop file moved to the common folder
+
+ -- Félix Medrano <xukosky@yahoo.es>  Wed,  05 Jan 2011 18:07:28 +0100
+
+dpg4x (2.0-1) unstable; urgency=low
+
+  * Initial Release
+
+ -- Félix Medrano <xukosky@yahoo.es>  Wed,  29 Dec 2010 10:15:35 +0100
+
