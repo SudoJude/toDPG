@@ -9,6 +9,7 @@ class EncoderService:
     def __init__(self, config_manager):
         self.config_manager = config_manager
         self.current_process = None
+        self.current_file = None
         self.progress = 0
         self.status = "idle" # idle, running, completed, error
         self.error_message = ""
@@ -19,6 +20,7 @@ class EncoderService:
             return False, "Encoding already in progress"
 
         self.status = "running"
+        self.current_file = input_file
         self.progress = 0
         self.error_message = ""
         self.output_log = []
@@ -37,6 +39,7 @@ class EncoderService:
     def get_status(self):
         return {
             "status": self.status,
+            "input_file": self.current_file,
             "progress": self.progress,
             "error": self.error_message,
             "log": self.output_log[-10:] # Return last 10 lines of log

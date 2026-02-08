@@ -23,6 +23,8 @@ def _resolve_and_validate(path):
     # Use safe_join to handle relative paths securely
     # It prevents ".." from escaping the base directory
     work_dir_abs = os.path.abspath(WORK_DIR)
+    if path == work_dir_abs:
+        return work_dir_abs
 
     # Remove WORK_DIR from path to make it relative to WORK_DIR
     # and be able to use safe_join

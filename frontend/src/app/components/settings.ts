@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../services/api';
@@ -9,7 +9,10 @@ import { ApiService } from '../services/api';
   imports: [CommonModule, FormsModule],
   template: `
     <div class="settings-panel" *ngIf="config">
-      <h3>Configuration</h3>
+      <div class="settings-header">
+        <h3>Configuration</h3>
+        <button class="close-btn" (click)="close.emit()" title="Close">×</button>
+      </div>
       
       <div class="section">
         <h4>Video</h4>
@@ -56,19 +59,26 @@ import { ApiService } from '../services/api';
     </div>
   `,
   styles: [`
-    .settings-panel { padding: 15px; border: 1px solid #eee; border-radius: 4px; background: #f9f9f9; }
-    .section { margin-bottom: 20px; }
-    h4 { margin-top: 0; margin-bottom: 10px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
-    .form-group { margin-bottom: 10px; }
-    label { display: block; margin-bottom: 5px; font-weight: 500; }
-    input[type="number"], select { width: 100%; padding: 5px; border: 1px solid #ccc; border-radius: 3px; }
-    input[type="checkbox"] { width: auto; margin-right: 5px; }
-    .actions { text-align: right; }
-    button { background: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
-    button:hover { background: #0056b3; }
+    .settings-panel { padding: 0; background: white; border-radius: 8px; overflow: hidden; }
+    .settings-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: #f8f9fa; border-bottom: 1px solid #eee; }
+    .settings-header h3 { margin: 0; font-size: 1.2em; color: #333; }
+    .close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #999; line-height: 1; padding: 0; }
+    .close-btn:hover { color: #333; }
+    
+    .section { padding: 15px 20px; border-bottom: 1px solid #f0f0f0; }
+    .section:last-of-type { border-bottom: none; }
+    h4 { margin-top: 0; margin-bottom: 12px; font-size: 1em; color: #555; }
+    .form-group { margin-bottom: 12px; }
+    label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9em; color: #666; }
+    input[type="number"], select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9em; }
+    input[type="checkbox"] { width: auto; margin-right: 8px; vertical-align: middle; }
+    .actions { padding: 15px 20px; background: #f8f9fa; text-align: right; border-top: 1px solid #eee; }
+    button:not(.close-btn) { background: #007bff; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-weight: 600; transition: background 0.2s; }
+    button:not(.close-btn):hover { background: #0056b3; }
   `]
 })
 export class SettingsComponent implements OnInit {
+  @Output() close = new EventEmitter<void>();
   config: any = null;
 
   constructor(private api: ApiService) { }
@@ -82,7 +92,7 @@ export class SettingsComponent implements OnInit {
 
   saveConfig() {
     this.api.updateConfig(this.config).subscribe({
-      next: () => alert('Settings saved!'),
+      next: () => this.close.emit(),
       error: (err) => console.error('Failed to save config', err)
     });
   }
