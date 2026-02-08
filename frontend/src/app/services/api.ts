@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -8,7 +8,13 @@ import { Observable } from 'rxjs';
 export class ApiService {
   private baseUrl = '/api';
 
+  refreshFiles$ = new Subject<void>();
+
   constructor(private http: HttpClient) { }
+
+  triggerFileRefresh() {
+    this.refreshFiles$.next();
+  }
 
   listFiles(path?: string): Observable<any> {
     const url = path ? `${this.baseUrl}/files?path=${encodeURIComponent(path)}` : `${this.baseUrl}/files`;

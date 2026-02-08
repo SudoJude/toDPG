@@ -60,6 +60,10 @@ export class ProgressComponent implements OnInit, OnDestroy {
     // Poll status every second
     this.pollSub = interval(1000).subscribe(() => {
       this.api.getStatus().subscribe(data => {
+        // Trigger refresh if status just transitioned to completed
+        if (this.status?.status === 'running' && data.status === 'completed') {
+          this.api.triggerFileRefresh();
+        }
         this.status = data;
       });
     });

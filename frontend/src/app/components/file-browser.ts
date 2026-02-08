@@ -1,6 +1,7 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, OnDestroy, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../services/api';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-file-browser',
@@ -91,7 +92,7 @@ import { ApiService } from '../services/api';
     .actions a { text-decoration: none; font-size: 1.2em; }
   `]
 })
-export class FileBrowserComponent implements OnInit {
+export class FileBrowserComponent implements OnInit, OnDestroy {
   @Output() fileSelected = new EventEmitter<string>();
 
   currentPath: string = '';
@@ -112,11 +113,23 @@ export class FileBrowserComponent implements OnInit {
 
   uploadingFile: boolean = false;
   rootPath: string = '';
+  private refreshSub: Subscription | null = null;
 
   constructor(private api: ApiService) { }
 
   ngOnInit() {
     this.loadFiles();
+
+    // Listen for file refresh requests
+    this.refreshSub = this.api.refreshFiles$.subscribe(() => {
+      this.loadFiles(this.currentPath);
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.refreshSub) {
+      this.refreshSub.unsubscribe();
+    }
   }
 
   loadFiles(path?: string) {

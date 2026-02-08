@@ -1,4 +1,16 @@
+import os
+from flask import Flask, request, jsonify, send_from_directory
 from werkzeug.utils import secure_filename, safe_join
+
+# Project imports
+from config_manager import ConfigManager
+from encoder_service import EncoderService
+from preview_service import PreviewService
+from thumbnail_service import ThumbnailService
+from dpg_header import DpgHeader
+from globals import WORK_DIR, TEMP_DIR
+
+app = Flask(__name__)
 
 def _resolve_and_validate(path):
     """
@@ -10,13 +22,17 @@ def _resolve_and_validate(path):
 
     # Use safe_join to handle relative paths securely
     # It prevents ".." from escaping the base directory
-    safe_path = safe_join(WORK_DIR, path)
+    work_dir_abs = os.path.abspath(WORK_DIR)
+
+    # Remove WORK_DIR from path to make it relative to WORK_DIR
+    # and be able to use safe_join
+    safe_path = safe_join(WORK_DIR, path.replace(work_dir_abs + os.sep, ""))
+        
     if not safe_path:
         return None
 
     # Normalize and get absolute paths for strict comparison
     p = os.path.abspath(safe_path)
-    work_dir_abs = os.path.abspath(WORK_DIR)
 
     # Final check: the resolved path MUST be within WORK_DIR
     if p == work_dir_abs or p.startswith(work_dir_abs + os.sep):
@@ -73,6 +89,9 @@ def upload_file():
     resolved = _resolve_and_validate(path)
     if resolved is None:
         return jsonify({"error": "Invalid target path"}), 403
+    
+    if not os.path.isdir(resolved):
+        return jsonify({"error": "Target path is not a directory"}), 400
         
     if 'file' not in request.files:
         return jsonify({"error": "No file provided"}), 400
@@ -84,6 +103,9 @@ def upload_file():
     try:
         # Save to target path (use secure filename)
         filename = secure_filename(file.filename)
+        if not filename:
+            return jsonify({"error": "Invalid filename after sanitization"}), 400
+            
         save_path = os.path.join(resolved, filename)
         # Ensure target directory exists
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
@@ -211,6 +233,10 @@ def set_thumbnail():
     resolved = _resolve_and_validate(path)
     if not resolved:
         return jsonify({"error": "Invalid path parameter"}), 400
+        
+    if not os.path.isfile(resolved):
+        return jsonify({"error": "Target is not a file"}), 400
+
     if 'image' not in request.files:
         return jsonify({"error": "No image file provided"}), 400
         
@@ -224,6 +250,9 @@ def set_thumbnail():
         os.makedirs(temp_dir, exist_ok=True)
             
         safe_filename = secure_filename(file.filename)
+        if not safe_filename:
+            return jsonify({"error": "Invalid image filename"}), 400
+            
         temp_path = os.path.join(temp_dir, 'upload_thumb_' + safe_filename)
         file.save(temp_path)
         

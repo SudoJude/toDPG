@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: backend/Dockerfile
-    image: ${BACKEND_IMAGE:-ghcr.io/d0malaga/dpg4x-backend:latest}
+    image: ${BACKEND_IMAGE:-ghcr.io/d0malaga/dpg4x/backend:latest}
     ports:
       - "${BACKEND_HOST_PORT:-5001}:5000"
     environment:
@@ -28,7 +28,7 @@ services:
 
   frontend:
     build: ./frontend
-    image: ${FRONTEND_IMAGE:-ghcr.io/d0malaga/dpg4x-frontend:latest}
+    image: ${FRONTEND_IMAGE:-ghcr.io/d0malaga/dpg4x/frontend:latest}
     ports:
       - "${FRONTEND_HOST_PORT:-8080}:8080"
     depends_on:

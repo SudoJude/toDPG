@@ -57,9 +57,9 @@ jobs:
           context: .
           file: backend/Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/dpg4x-backend:latest
-          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/dpg4x-backend:cache
-          cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/dpg4x-backend:cache,mode=max
+          tags: ghcr.io/${{ github.repository_owner }}/dpg4x/backend:latest
+          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/dpg4x/backend:cache
+          cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/dpg4x/backend:cache,mode=max
 
       - name: Build frontend image (with registry cache)
         uses: docker/build-push-action@v5
@@ -67,14 +67,14 @@ jobs:
           context: ./frontend
           file: frontend/Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/dpg4x-frontend:latest
-          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/dpg4x-frontend:cache
-          cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/dpg4x-frontend:cache,mode=max
+          tags: ghcr.io/${{ github.repository_owner }}/dpg4x/frontend:latest
+          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/dpg4x/frontend:cache
+          cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/dpg4x/frontend:cache,mode=max
 
       - name: Start services with Docker Compose
         env:
-          BACKEND_IMAGE: ghcr.io/${{ github.repository_owner }}/dpg4x-backend:latest
-          FRONTEND_IMAGE: ghcr.io/${{ github.repository_owner }}/dpg4x-frontend:latest
+          BACKEND_IMAGE: ghcr.io/${{ github.repository_owner }}/dpg4x/backend:latest
+          FRONTEND_IMAGE: ghcr.io/${{ github.repository_owner }}/dpg4x/frontend:latest
         run: |
           docker compose up -d
 
