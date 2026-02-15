@@ -38,6 +38,8 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ghcr.io/${{ github.repository }}/backend
+          flavor: |
+            latest=auto
           tags: |
             type=raw,value=${{ github.event.inputs.tag_name }},enable=${{ github.event.inputs.tag_name != '' }}
             type=ref,event=branch
@@ -50,6 +52,8 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ghcr.io/${{ github.repository }}/frontend
+          flavor: |
+            latest=auto
           tags: |
             type=raw,value=${{ github.event.inputs.tag_name }},enable=${{ github.event.inputs.tag_name != '' }}
             type=ref,event=branch
@@ -67,6 +71,7 @@ jobs:
           tags: ${{ steps.meta-backend.outputs.tags }}
           labels: ${{ steps.meta-backend.outputs.labels }}
           provenance: false
+          sbom: false
       
       - name: Build and push frontend
         uses: docker/build-push-action@v6
@@ -78,6 +83,7 @@ jobs:
           tags: ${{ steps.meta-frontend.outputs.tags }}
           labels: ${{ steps.meta-frontend.outputs.labels }}
           provenance: false
+          sbom: false
 
   create-release:
     runs-on: ubuntu-latest
@@ -95,7 +101,10 @@ jobs:
           name: Release ${{ github.ref_name }}
           body: |
             Docker images pushed to GHCR:
-            - ghcr.io/${{ github.repository }}/backend:${{ github.ref_name }}
-            - ghcr.io/${{ github.repository }}/frontend:${{ github.ref_name }}
+            - `docker pull ghcr.io/${{ github.repository }}/backend:${{ github.ref_name }}`
+            - `docker pull ghcr.io/${{ github.repository }}/frontend:${{ github.ref_name }}`
+            
+            > [!NOTE]
+            > If you pushed a semver tag like `v1.2.3`, the image is also available as `1.2.3`.
           draft: false
           prerelease: false
