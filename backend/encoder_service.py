@@ -73,15 +73,19 @@ class EncoderService:
             
             # 2. Encode Audio
             self.output_log.append("Encoding Audio...")
-            # DPG standard: MP2, 32000Hz, 2 channels, 128k
+            # Retrieve settings from config
+            audio_bitrate = self.config_manager.get('AUDIO', 'audio_bitrate_mp2', '128') + 'k'
+            audio_freq = self.config_manager.get('AUDIO', 'audio_frequency', '32000')
+            
+            # DPG standard: MP2, 32000Hz (usually), 2 channels, 128k
             audio_cmd = [
                 'ffmpeg', '-y', 
                 '-i', input_file, 
                 '-vn', 
                 '-c:a', 'mp2', 
-                '-ar', '32000', 
+                '-ar', audio_freq, 
                 '-ac', '2', 
-                '-b:a', '128k', 
+                '-b:a', audio_bitrate, 
                 '-f', 'mp2', 
                 '--', audio_temp
             ]
@@ -91,15 +95,19 @@ class EncoderService:
 
             # 3. Encode Video
             self.output_log.append("Encoding Video...")
-            # DPG standard: MPEG1, 256x192, 24fps, 256k
+            # Retrieve settings from config
+            video_fps = self.config_manager.get('VIDEO', 'video_fps', '24')
+            video_bitrate = self.config_manager.get('VIDEO', 'video_bitrate', '256')
+            
+            # DPG standard: MPEG1, 256x192, 24fps (default), 256k
             video_cmd = [
                 'ffmpeg', '-y', 
                 '-i', input_file,
                 '-an',
                 '-c:v', 'mpeg1video',
                 '-s', '256x192',
-                '-r', '24',
-                '-b:v', '256k',
+                '-r', video_fps,
+                '-b:v', video_bitrate + 'k',
                 '-f', 'mpeg1video',
                 '--', video_temp
             ]
@@ -128,10 +136,6 @@ class EncoderService:
                     if len(raw_rgb) == 256 * 192 * 3:
                         # Convert RGB24 to RGB1555 (16-bit)
                         # Format: A1 R5 G5 B5 (Little Endian in file?)
-                        # Logic from DpgThumbnail.py:
-                        # pixel = (( 1 << 15) | ((blue >> 3) << 10) | ((green >> 3) << 5) | (red >> 3))
-                        # packed = struct.pack('H', pixel)
-                        
                         packed_pixels = []
                         for i in range(0, len(raw_rgb), 3):
                             r = raw_rgb[i]
@@ -155,11 +159,12 @@ class EncoderService:
             video_size = os.path.getsize(video_temp)
             
             # FPS Calculation
-            fps = 24
-            duration = (video_size * 8) / 256000
+            fps = int(video_fps)
+            # Rough duration estimate for frame count
+            duration = (video_size * 8) / (int(video_bitrate) * 1000)
             frames = int(duration * fps)
             
-            freq = 32000
+            freq = int(audio_freq)
             channels = 0 # 0=mp2
 
             # DPG4 Header Construction
