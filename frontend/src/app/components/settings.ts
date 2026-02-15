@@ -1,87 +1,92 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../services/api';
+import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatInputModule } from '@angular/material/input';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatInputModule,
+    MatCheckboxModule,
+    MatButtonModule
+  ],
   template: `
-    <div class="settings-panel" *ngIf="config">
-      <div class="settings-header">
-        <h3>Configuration</h3>
-        <button class="close-btn" (click)="close.emit()" title="Close">×</button>
-      </div>
-      
+    <h2 mat-dialog-title>Configuration</h2>
+    <mat-dialog-content class="mat-typography" *ngIf="config">
       <div class="section">
-        <h4>Video</h4>
-        <div class="form-group">
-          <label>Bitrate (kbps)</label>
-          <input type="number" [(ngModel)]="config.VIDEO.video_bitrate">
+        <h3>Video</h3>
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Bitrate (kbps)</mat-label>
+            <input matInput type="number" [(ngModel)]="config.VIDEO.video_bitrate">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>FPS</mat-label>
+            <mat-select [(ngModel)]="config.VIDEO.video_fps">
+              <mat-option value="15">15</mat-option>
+              <mat-option value="20">20</mat-option>
+              <mat-option value="24">24</mat-option>
+            </mat-select>
+          </mat-form-field>
         </div>
-        <div class="form-group">
-          <label>FPS</label>
-          <select [(ngModel)]="config.VIDEO.video_fps">
-            <option value="15">15</option>
-            <option value="20">20</option>
-            <option value="24">24</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>
-            <input type="checkbox" [(ngModel)]="config.VIDEO.video_keepaspect"> Keep Aspect Ratio
-          </label>
-        </div>
+        
+        <mat-checkbox [(ngModel)]="config.VIDEO.video_keepaspect">
+          Keep Aspect Ratio
+        </mat-checkbox>
       </div>
 
       <div class="section">
-        <h4>Audio</h4>
-        <div class="form-group">
-          <label>Bitrate (kbps)</label>
-          <select [(ngModel)]="config.AUDIO.audio_bitrate_mp2">
-            <option value="64">64</option>
-            <option value="96">96</option>
-            <option value="128">128</option>
-            <option value="192">192</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>
-            <input type="checkbox" [(ngModel)]="config.AUDIO.audio_normalize"> Normalize Volume
-          </label>
-        </div>
-      </div>
+        <h3>Audio</h3>
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Bitrate (kbps)</mat-label>
+            <mat-select [(ngModel)]="config.AUDIO.audio_bitrate_mp2">
+              <mat-option value="64">64</mat-option>
+              <mat-option value="96">96</mat-option>
+              <mat-option value="128">128</mat-option>
+              <mat-option value="192">192</mat-option>
+            </mat-select>
+          </mat-form-field>
 
-      <div class="actions">
-        <button (click)="saveConfig()">Save Settings</button>
+          <mat-checkbox [(ngModel)]="config.AUDIO.audio_normalize">
+            Normalize Volume
+          </mat-checkbox>
+        </div>
       </div>
-    </div>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+      <button mat-button mat-dialog-close>Cancel</button>
+      <button mat-raised-button color="primary" (click)="saveConfig()">Save Settings</button>
+    </mat-dialog-actions>
   `,
   styles: [`
-    .settings-panel { padding: 0; background: white; border-radius: 8px; overflow: hidden; }
-    .settings-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: #f8f9fa; border-bottom: 1px solid #eee; }
-    .settings-header h3 { margin: 0; font-size: 1.2em; color: #333; }
-    .close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #999; line-height: 1; padding: 0; }
-    .close-btn:hover { color: #333; }
-    
-    .section { padding: 15px 20px; border-bottom: 1px solid #f0f0f0; }
-    .section:last-of-type { border-bottom: none; }
-    h4 { margin-top: 0; margin-bottom: 12px; font-size: 1em; color: #555; }
-    .form-group { margin-bottom: 12px; }
-    label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9em; color: #666; }
-    input[type="number"], select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9em; }
-    input[type="checkbox"] { width: auto; margin-right: 8px; vertical-align: middle; }
-    .actions { padding: 15px 20px; background: #f8f9fa; text-align: right; border-top: 1px solid #eee; }
-    button:not(.close-btn) { background: #007bff; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-weight: 600; transition: background 0.2s; }
-    button:not(.close-btn):hover { background: #0056b3; }
+    .section { margin-bottom: 24px; }
+    .section h3 { margin-top: 0; margin-bottom: 16px; font-size: 1.1em; color: #555; }
+    .form-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+    mat-form-field { flex: 1; min-width: 150px; }
+    mat-checkbox { margin-bottom: 16px; }
   `]
 })
 export class SettingsComponent implements OnInit {
-  @Output() close = new EventEmitter<void>();
   config: any = null;
 
-  constructor(private api: ApiService) { }
+  constructor(
+    private api: ApiService,
+    private dialogRef: MatDialogRef<SettingsComponent>
+  ) { }
 
   ngOnInit() {
     this.api.getConfig().subscribe({
@@ -92,7 +97,7 @@ export class SettingsComponent implements OnInit {
 
   saveConfig() {
     this.api.updateConfig(this.config).subscribe({
-      next: () => this.close.emit(),
+      next: () => this.dialogRef.close(true),
       error: (err) => console.error('Failed to save config', err)
     });
   }

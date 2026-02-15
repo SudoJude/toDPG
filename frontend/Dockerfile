@@ -1,16 +1,16 @@
 # Stage 1: Build the Angular application
-FROM node:20-alpine as build
+FROM node:25-alpine as build
 
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm install --legacy-peer-deps
 
 COPY . .
 RUN npm run build
 
 # Stage 2: Serve the application with Nginx
-FROM nginx:alpine
+FROM nginx:mainline-alpine
 
 # Create dpg4x user and group
 RUN addgroup -S dpg4x && adduser -S dpg4x -G dpg4x

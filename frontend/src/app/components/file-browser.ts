@@ -3,149 +3,192 @@ import { CommonModule } from '@angular/common';
 import { ApiService } from '../services/api';
 import { Subscription } from 'rxjs';
 import { ProgressComponent } from './progress';
+import { MatListModule } from '@angular/material/list';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 @Component({
   selector: 'app-file-browser',
   standalone: true,
-  imports: [CommonModule, ProgressComponent],
+  imports: [
+    CommonModule,
+    ProgressComponent,
+    MatListModule,
+    MatIconModule,
+    MatButtonModule,
+    MatCardModule,
+    MatDividerModule,
+    MatTooltipModule,
+    MatProgressBarModule
+  ],
   template: `
     <div class="file-browser-container">
       <div class="browser-section">
         <div class="header">
-          <button (click)="navigateUp()" [disabled]="!parentPath">⬆ Up</button>
-          <span class="current-path">{{ currentPath }}</span>
+          <button mat-icon-button (click)="navigateUp()" [disabled]="!parentPath" matTooltip="Up">
+            <mat-icon>arrow_upward</mat-icon>
+          </button>
+          <span class="current-path" [matTooltip]="currentPath">{{ currentPath }}</span>
+          
           <div class="upload-actions">
             <input type="file" #fileInput (change)="onUploadSelected($event)" style="display: none">
-            <button (click)="$event.stopPropagation(); fileInput.click()" [disabled]="uploadingFile">
-              {{ uploadingFile ? 'Uploading...' : 'Upload File' }}
+            <button mat-raised-button color="primary" (click)="$event.stopPropagation(); fileInput.click()" [disabled]="uploadingFile">
+              <mat-icon *ngIf="!uploadingFile">upload</mat-icon>
+              {{ uploadingFile ? 'Uploading...' : 'Upload' }}
             </button>
           </div>
         </div>
-        <ul class="file-list">
-          <li *ngFor="let item of items" (click)="onItemClick(item)" [class.selected]="selectedFile === item.path">
-            <span class="icon">{{ item.is_dir ? '📁' : '📄' }}</span>
-            <span class="name">{{ item.name }}</span>
-            <span class="size" *ngIf="!item.is_dir">{{ formatSize(item.size) }}</span>
-            <div class="actions" *ngIf="!item.is_dir">
-               <a [href]="getDownloadUrl(item.path)" target="_blank" (click)="$event.stopPropagation()">⬇</a>
+
+        <mat-nav-list class="file-list">
+          <mat-list-item *ngFor="let item of items" (click)="onItemClick(item)" [class.selected]="selectedFile === item.path">
+            <mat-icon matListItemIcon>{{ item.is_dir ? 'folder' : 'insert_drive_file' }}</mat-icon>
+            <div matListItemTitle class="name">{{ item.name }}</div>
+            <div matListItemLine class="size" *ngIf="!item.is_dir">{{ formatSize(item.size) }}</div>
+            <div matListItemMeta *ngIf="!item.is_dir">
+               <button mat-icon-button (click)="$event.stopPropagation(); download(item.path)" matTooltip="Download">
+                 <mat-icon>download</mat-icon>
+               </button>
             </div>
-          </li>
-        </ul>
+          </mat-list-item>
+        </mat-nav-list>
       </div>
 
       <div class="info-section">
         <app-progress [selectedFile]="selectedFile"></app-progress>
 
-        <div class="dpg-info" *ngIf="dpgInfo; else noDpg">
-          <h3>DPG Info</h3>
-          <div class="metadata">
-            <p><strong>Version:</strong> {{ dpgInfo.version }}</p>
-            <p><strong>Frames:</strong> {{ dpgInfo.frames }}</p>
-            <p><strong>FPS:</strong> {{ dpgInfo.fps }}</p>
-            <p><strong>Duration:</strong> {{ dpgInfo.duration_seconds | number:'1.0-2' }}s</p>
-            <p><strong>Video Size:</strong> {{ formatSize(dpgInfo.video_size) }}</p>
-            <p><strong>Audio Size:</strong> {{ formatSize(dpgInfo.audio_size) }}</p>
-          </div>
+        <mat-card *ngIf="dpgInfo; else noDpg" class="info-card">
+          <mat-card-header>
+            <mat-card-title>DPG Information</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="metadata-grid">
+              <div class="meta-item">
+                <span class="label">Version</span>
+                <span class="value">{{ dpgInfo.version }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="label">Frames</span>
+                <span class="value">{{ dpgInfo.frames }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="label">FPS</span>
+                <span class="value">{{ dpgInfo.fps }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="label">Duration</span>
+                <span class="value">{{ dpgInfo.duration_seconds | number:'1.0-2' }}s</span>
+              </div>
+            </div>
 
-          <div class="thumbnail-section">
-            <h4>Thumbnail</h4>
-            <div class="thumb-container">
-              <img [src]="thumbnailUrl" alt="DPG Thumbnail" (error)="onThumbnailError()" class="thumbnail" *ngIf="thumbnailUrl">
-              <div *ngIf="!thumbnailUrl && !thumbnailError" class="loading">Loading thumbnail...</div>
-              <div *ngIf="thumbnailError" class="no-thumb">No thumbnail available</div>
+            <mat-divider></mat-divider>
+
+            <div class="thumbnail-section">
+              <h4>Thumbnail</h4>
+              <div class="thumb-container">
+                <img [src]="thumbnailUrl" alt="DPG Thumbnail" (error)="onThumbnailError()" class="thumbnail" *ngIf="thumbnailUrl">
+                <div *ngIf="!thumbnailUrl && !thumbnailError" class="loading-thumb">
+                  <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+                </div>
+                <div *ngIf="thumbnailError" class="no-thumb">
+                  <mat-icon>image_not_supported</mat-icon>
+                  <span>No thumbnail</span>
+                </div>
+              </div>
+              
+              <div class="update-thumb-actions">
+                <input type="file" #thumbInput (change)="onThumbnailSelected($event)" accept="image/*" style="display: none">
+                <button mat-button (click)="thumbInput.click()">Select Image</button>
+                <button mat-flat-button color="accent" (click)="uploadThumbnail()" [disabled]="!selectedThumbnail || uploadingThumbnail">
+                  {{ uploadingThumbnail ? 'Updating...' : 'Update' }}
+                </button>
+              </div>
+              <p class="status-msg error" *ngIf="uploadError">{{ uploadError }}</p>
+              <p class="status-msg success" *ngIf="uploadSuccess">Thumbnail updated!</p>
             </div>
             
-            <div class="update-thumb">
-              <label class="file-label">
-                <span>Change Thumbnail:</span>
-                <input type="file" (change)="onThumbnailSelected($event)" accept="image/*">
-              </label>
-              <button (click)="uploadThumbnail()" [disabled]="!selectedThumbnail || uploadingThumbnail">
-                {{ uploadingThumbnail ? 'Uploading...' : 'Update' }}
+            <mat-divider></mat-divider>
+
+            <div class="preview-section">
+              <button mat-raised-button color="primary" class="preview-btn" (click)="generatePreview()" [disabled]="loadingPreview" *ngIf="!previewUrl">
+                <mat-icon>play_circle</mat-icon>
+                {{ loadingPreview ? 'Generating...' : 'Video Preview' }}
               </button>
-              <div *ngIf="uploadError" class="error">{{ uploadError }}</div>
-              <div *ngIf="uploadSuccess" class="success">Thumbnail updated!</div>
+              <p class="status-msg error" *ngIf="previewError">{{ previewError }}</p>
+              <video *ngIf="previewUrl" [src]="previewUrl" controls autoplay></video>
             </div>
-          </div>
-          
-          <div class="preview-section">
-            <button class="preview-btn" (click)="generatePreview()" [disabled]="loadingPreview" *ngIf="!previewUrl">
-              {{ loadingPreview ? 'Generating Preview...' : 'Preview Video' }}
-            </button>
-            <div *ngIf="previewError" class="error">{{ previewError }}</div>
-            <video *ngIf="previewUrl" [src]="previewUrl" controls autoplay width="100%"></video>
-          </div>
-        </div>
+          </mat-card-content>
+        </mat-card>
+
         <ng-template #noDpg>
           <div class="no-selection" *ngIf="!selectedFile">
+            <mat-icon>info</mat-icon>
             <p>Select a file to see details</p>
           </div>
-          <div class="conversion-section" *ngIf="selectedFile && !dpgInfo">
-             <div class="selected-header">
-                <h3>Selected: {{ selectedFile.split('/').pop() }}</h3>
-             </div>
-             <div class="conversion-actions">
-                <p>Convert this file to DPG format for playback.</p>
-                <button class="convert-btn" (click)="startConversion()">
+          <mat-card class="conversion-card" *ngIf="selectedFile && !dpgInfo">
+             <mat-card-header>
+                <mat-card-title>Ready to Convert</mat-card-title>
+                <mat-card-subtitle>{{ selectedFile.split('/').pop() }}</mat-card-subtitle>
+             </mat-card-header>
+             <mat-card-content>
+                <p>Convert this file to DPG format for playback on your Nintendo DS.</p>
+             </mat-card-content>
+             <mat-card-actions align="end">
+                <button mat-raised-button color="accent" (click)="startConversion()">
+                  <mat-icon>movie_edit</mat-icon>
                   Convert to DPG
                 </button>
-             </div>
-          </div>
+             </mat-card-actions>
+          </mat-card>
         </ng-template>
       </div>
     </div>
   `,
   styles: [`
-    .file-browser-container { display: flex; border: 1px solid #ddd; border-radius: 8px; height: 650px; background: white; overflow: hidden; }
+    .file-browser-container { display: flex; height: 100%; min-height: 600px; gap: 20px; }
     
-    .browser-section { flex: 1.5; display: flex; flex-direction: column; border-right: 1px solid #eee; }
-    .info-section { flex: 1; background: #fafafa; overflow-y: auto; padding: 15px; }
+    .browser-section { flex: 1.5; display: flex; flex-direction: column; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); overflow: hidden; }
+    .info-section { flex: 1; overflow-y: auto; }
 
-    .header { display: flex; align-items: center; gap: 10px; padding: 15px; border-bottom: 1px solid #eee; background: #fff; }
-    .current-path { font-family: monospace; font-size: 0.85em; color: #666; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+    .header { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid #eee; }
+    .current-path { flex: 1; font-family: 'Roboto Mono', monospace; font-size: 0.85em; color: #666; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     
-    .file-list { list-style: none; padding: 0; margin: 0; overflow-y: auto; flex: 1; }
-    .file-list li { display: flex; align-items: center; padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #f9f9f9; transition: background 0.1s; }
-    .file-list li:hover { background-color: #f5f5f5; }
-    .file-list li.selected { background-color: #e3f2fd; border-left: 3px solid #2196f3; padding-left: 12px; }
+    .file-list { overflow-y: auto; flex: 1; }
+    .selected { background-color: rgba(63, 81, 181, 0.08) !important; }
+    .name { font-weight: 500; }
+    .size { color: #888; }
     
-    .icon { margin-right: 12px; font-size: 1.2em; }
-    .name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.95em; }
-    .size { font-size: 0.8em; color: #999; margin-left: 10px; }
+    .info-card, .conversion-card { margin-bottom: 20px; }
     
-    .dpg-info h3 { margin: 0 0 15px 0; font-size: 1.1em; color: #333; }
-    .metadata p { margin: 5px 0; font-size: 0.9em; line-height: 1.4; color: #555; }
+    .metadata-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+    .meta-item { display: flex; flex-direction: column; }
+    .meta-item .label { font-size: 0.75em; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+    .meta-item .value { font-weight: 500; }
     
-    .thumbnail-section { margin-top: 20px; padding: 15px; background: white; border: 1px solid #eee; border-radius: 6px; }
-    .thumbnail-section h4 { margin: 0 0 10px 0; font-size: 0.95em; }
-    .thumb-container { display: flex; justify-content: center; background: #eee; border-radius: 4px; overflow: hidden; min-height: 120px; align-items: center; }
-    .thumbnail { max-width: 100%; height: auto; display: block; }
-    
-    .update-thumb { margin-top: 15px; display: flex; flex-direction: column; gap: 10px; }
-    .file-label { font-size: 0.85em; display: flex; flex-direction: column; gap: 5px; }
-    .file-label input { font-size: 0.9em; }
-    
-    .preview-section { margin-top: 20px; }
-    .preview-btn { width: 100%; padding: 10px; background: #2196f3; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 500; }
-    .preview-btn:hover { background: #1976d2; }
-    
-    .conversion-section { padding: 10px; }
-    .selected-header h3 { margin: 0 0 15px 0; font-size: 1.1em; color: #333; word-break: break-all; }
-    .conversion-actions { background: white; padding: 20px; border-radius: 8px; border: 1px solid #eee; }
-    .conversion-actions p { margin: 0 0 20px 0; color: #666; font-size: 0.9em; }
-    .convert-btn { width: 100%; padding: 12px; background: #4caf50; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 1em; transition: background 0.2s; }
-    .convert-btn:hover { background: #388e3c; }
+    .thumbnail-section { padding: 16px 0; }
+    .thumbnail-section h4 { margin: 0 0 12px 0; font-size: 0.9em; color: #666; }
+    .thumb-container { background: #f0f0f0; border-radius: 4px; overflow: hidden; height: 144px; display: flex; align-items: center; justify-content: center; position: relative; }
+    .thumbnail { width: 100%; height: 100%; object-fit: contain; }
+    .loading-thumb { width: 100%; padding: 0 20px; }
+    .no-thumb { display: flex; flex-direction: column; align-items: center; color: #bbb; gap: 8px; }
+    .no-thumb mat-icon { font-size: 40px; width: 40px; height: 40px; }
 
-    .no-selection { height: 100%; display: flex; align-items: center; justify-content: center; color: #999; font-style: italic; }
+    .update-thumb-actions { display: flex; gap: 8px; margin-top: 12px; }
     
-    .error { color: #d32f2f; font-size: 0.85em; margin-top: 5px; }
-    .success { color: #388e3c; font-size: 0.85em; margin-top: 5px; }
-    video { margin-top: 10px; border-radius: 4px; background: black; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .preview-section { padding-top: 16px; }
+    .preview-btn { width: 100%; }
+    .preview-btn mat-icon { margin-right: 8px; }
+    video { width: 100%; margin-top: 12px; border-radius: 4px; background: black; display: block; }
     
-    .upload-actions { margin-left: auto; }
-    .actions { margin-left: 10px; opacity: 0.5; transition: opacity 0.2s; }
-    li:hover .actions { opacity: 1; }
-    .actions a { text-decoration: none; font-size: 1.1em; }
+    .no-selection { height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #999; gap: 12px; }
+    .no-selection mat-icon { font-size: 48px; width: 48px; height: 48px; }
+    
+    .status-msg { font-size: 0.85em; margin-top: 8px; }
+    .error { color: #f44336; }
+    .success { color: #4caf50; }
   `]
 })
 export class FileBrowserComponent implements OnInit, OnDestroy {
@@ -175,8 +218,6 @@ export class FileBrowserComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loadFiles();
-
-    // Listen for file refresh requests
     this.refreshSub = this.api.refreshFiles$.subscribe(() => {
       this.loadFiles(this.currentPath, true);
     });
@@ -193,7 +234,7 @@ export class FileBrowserComponent implements OnInit, OnDestroy {
       next: (data) => {
         this.currentPath = data.current_path;
         this.parentPath = data.parent_path;
-        this.rootPath = data.root_path; // Capture (new) root path from backend
+        this.rootPath = data.root_path;
         this.items = data.items;
 
         if (!preserveSelection) {
@@ -202,7 +243,6 @@ export class FileBrowserComponent implements OnInit, OnDestroy {
           this.resetPreview();
           this.resetThumbnail();
         } else if (this.selectedFile) {
-          // If preserving selection, we might want to refresh dpgInfo if the file still exists
           const stillExists = this.items.some(item => item.path === this.selectedFile);
           if (!stillExists) {
             this.selectedFile = null;
@@ -292,7 +332,6 @@ export class FileBrowserComponent implements OnInit, OnDestroy {
         this.uploadingThumbnail = false;
         this.uploadSuccess = true;
         this.selectedThumbnail = null;
-        // Reload thumbnail to show new image
         this.loadThumbnail(this.selectedFile!);
       },
       error: (err) => {
@@ -309,7 +348,7 @@ export class FileBrowserComponent implements OnInit, OnDestroy {
       this.api.uploadFile(this.currentPath, file).subscribe({
         next: () => {
           this.uploadingFile = false;
-          this.loadFiles(this.currentPath); // Refresh list
+          this.loadFiles(this.currentPath);
         },
         error: (err) => {
           this.uploadingFile = false;
@@ -319,17 +358,14 @@ export class FileBrowserComponent implements OnInit, OnDestroy {
     }
   }
 
-  getDownloadUrl(path: string): string {
-    return this.api.getDownloadUrl(path);
+  download(path: string) {
+    window.open(this.api.getDownloadUrl(path), '_blank');
   }
 
   startConversion() {
     if (!this.selectedFile) return;
     this.api.convert(this.selectedFile).subscribe({
-      next: () => {
-        // The ProgressComponent already listens for status changes
-        // No need for extra feedback here besides the conversion starting
-      },
+      next: () => { },
       error: (err) => alert('Failed to start conversion: ' + (err.error?.error || err.message))
     });
   }
@@ -343,9 +379,6 @@ export class FileBrowserComponent implements OnInit, OnDestroy {
     this.api.generatePreview(this.selectedFile).subscribe({
       next: (data) => {
         this.loadingPreview = false;
-        // Backend returns relative path like /static/previews/...
-        // We need to prepend backend URL if running on different port in dev
-        // But for now assuming proxy or same origin
         this.previewUrl = 'http://localhost:5001' + data.preview_url;
       },
       error: (err) => {
