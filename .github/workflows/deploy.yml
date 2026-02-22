@@ -20,6 +20,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
+      - name: Set short SHA
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       
@@ -88,14 +92,14 @@ jobs:
       - name: Generate Backend SBOM
         uses: anchore/sbom-action@v0
         with:
-          image: ghcr.io/${{ github.repository }}/backend:sha-${{ github.sha }}
+          image: ghcr.io/${{ github.repository }}/backend:sha-${{ steps.vars.outputs.sha_short }}
           artifact-name: backend-sbom.spdx.json
           output-file: backend-sbom.spdx.json
 
       - name: Generate Frontend SBOM
         uses: anchore/sbom-action@v0
         with:
-          image: ghcr.io/${{ github.repository }}/frontend:sha-${{ github.sha }}
+          image: ghcr.io/${{ github.repository }}/frontend:sha-${{ steps.vars.outputs.sha_short }}
           artifact-name: frontend-sbom.spdx.json
           output-file: frontend-sbom.spdx.json
 
