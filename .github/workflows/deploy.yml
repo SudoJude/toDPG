@@ -70,8 +70,8 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta-backend.outputs.tags }}
           labels: ${{ steps.meta-backend.outputs.labels }}
-          provenance: false
-          sbom: false
+          provenance: true
+          sbom: true
       
       - name: Build and push frontend
         uses: docker/build-push-action@v6
@@ -82,8 +82,22 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta-frontend.outputs.tags }}
           labels: ${{ steps.meta-frontend.outputs.labels }}
-          provenance: false
-          sbom: false
+          provenance: true
+          sbom: true
+
+      - name: Generate Backend SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: ghcr.io/${{ github.repository }}/backend:sha-${{ github.sha }}
+          artifact-name: backend-sbom.spdx.json
+          output-file: backend-sbom.spdx.json
+
+      - name: Generate Frontend SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: ghcr.io/${{ github.repository }}/frontend:sha-${{ github.sha }}
+          artifact-name: frontend-sbom.spdx.json
+          output-file: frontend-sbom.spdx.json
 
   create-release:
     runs-on: ubuntu-latest
@@ -94,15 +108,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
+      - name: Download Backend SBOM
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-sbom.spdx.json
+          path: ./sbom
+
+      - name: Download Frontend SBOM
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-sbom.spdx.json
+          path: ./sbom
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
+          files: |
+            ./sbom/backend-sbom.spdx.json
+            ./sbom/frontend-sbom.spdx.json
           body: |
             Docker images pushed to GHCR:
             - `docker pull ghcr.io/${{ github.repository }}/backend:${{ github.ref_name }}`
             - `docker pull ghcr.io/${{ github.repository }}/frontend:${{ github.ref_name }}`
+            
+            SBOMs (Software Bill of Materials) are attached as release assets.
             
             > [!NOTE]
             > If you pushed a semver tag like `v1.2.3`, the image is also available as `1.2.3`.
