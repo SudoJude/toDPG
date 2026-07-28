@@ -6,7 +6,8 @@ This module is intentionally free of any web/UI framework dependency
 (no Flask, no Docker, no threading-based job state). It exposes a single
 synchronous `encode()` function that a caller — a CLI, a desktop UI, or a
 web route — can run directly or on a thread/process of its own choosing,
-optionally receiving progress updates via a callback.
+optionally receiving progress updates via a callback and cancelling via a
+threading.Event.
 """
 from __future__ import annotations
 
@@ -15,9 +16,11 @@ import shutil
 import struct
 import subprocess
 import tempfile
+import threading
 from dataclasses import dataclass
 from typing import Callable, Optional
 
+from dpgcore.constants import AUDIO_CHANNELS, snap_audio_frequency, snap_fps
 from dpgcore.dpg_header import (
     DpgHeader,
     PIXEL_FORMAT_RGB24,
@@ -25,18 +28,29 @@ from dpgcore.dpg_header import (
     THUMBNAIL_SIZE_BYTES,
     THUMBNAIL_WIDTH,
 )
+from dpgcore.exceptions import (
+    EncodingCancelled,
+    EncodingError,
+    FFmpegNotFoundError,
+    ProbeError,
+    SubprocessFailedError,
+)
 
 ProgressCallback = Callable[[str, str], None]  # (stage, message) -> None
 
-
-class EncodingError(Exception):
-    """Raised when FFmpeg or the muxing step fails."""
+# How often the cancel-watcher thread polls the cancel event, in seconds.
+_CANCEL_POLL_INTERVAL = 0.2
+# How long to wait for a terminated process to exit before SIGKILL-ing it.
+_TERMINATE_GRACE_SECONDS = 3
+# ffprobe should return almost instantly; this is a hang backstop, not a
+# realistic budget.
+_PROBE_TIMEOUT_SECONDS = 30
 
 
 @dataclass
 class EncodeSettings:
     dpg_version: int = 4
-    video_fps: int = 24
+    video_fps: float = 24.0
     video_bitrate_kbps: int = 256
     video_width: int = THUMBNAIL_WIDTH
     video_height: int = THUMBNAIL_HEIGHT
@@ -46,6 +60,13 @@ class EncodeSettings:
     audio_channels: int = 2
     ffmpeg_path: str = "ffmpeg"
     ffprobe_path: str = "ffprobe"
+
+    def __post_init__(self) -> None:
+        # Snap to MPEG-1/DPG-safe values so arbitrary GUI- or file-derived
+        # settings can never reach ffmpeg's argv and crash the encoder.
+        self.video_fps = snap_fps(self.video_fps)
+        self.audio_frequency = snap_audio_frequency(self.audio_frequency)
+        self.audio_channels = AUDIO_CHANNELS
 
 
 @dataclass
@@ -62,22 +83,59 @@ def _report(on_progress: Optional[ProgressCallback], stage: str, message: str) -
         on_progress(stage, message)
 
 
-def _run(cmd: list[str], stage: str, on_progress: Optional[ProgressCallback]) -> None:
+def _watch_for_cancel(process: subprocess.Popen, cancel_event: threading.Event) -> None:
+    """Terminate `process` if `cancel_event` is set while it's still running.
+
+    Runs on its own daemon thread so it can act even if the caller's thread
+    is blocked reading the process's stdout (e.g. a hung/silent ffmpeg).
+    Exits on its own once the process finishes, so it never outlives the
+    _run() call that started it.
+    """
+    while process.poll() is None:
+        if cancel_event.wait(timeout=_CANCEL_POLL_INTERVAL):
+            process.terminate()
+            try:
+                process.wait(timeout=_TERMINATE_GRACE_SECONDS)
+            except subprocess.TimeoutExpired:
+                process.kill()
+            return
+
+
+def _run(
+    cmd: list[str],
+    stage: str,
+    on_progress: Optional[ProgressCallback],
+    cancel_event: Optional[threading.Event] = None,
+) -> None:
     """Run a subprocess, streaming stderr/stdout lines to on_progress."""
     _report(on_progress, stage, f"$ {' '.join(cmd)}")
-    process = subprocess.Popen(
-        cmd,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        universal_newlines=True,
-    )
+    try:
+        process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            universal_newlines=True,
+        )
+    except OSError as exc:
+        raise FFmpegNotFoundError(f"Could not run {cmd[0]!r}: {exc}") from exc
+
+    watcher: Optional[threading.Thread] = None
+    if cancel_event is not None:
+        watcher = threading.Thread(
+            target=_watch_for_cancel, args=(process, cancel_event), daemon=True
+        )
+        watcher.start()
+
     for line in process.stdout:
         line = line.strip()
         if line:
             _report(on_progress, stage, line)
     return_code = process.wait()
+
+    if cancel_event is not None and cancel_event.is_set():
+        raise EncodingCancelled(f"{stage} cancelled")
     if return_code != 0:
-        raise EncodingError(f"{stage} failed (ffmpeg exit code {return_code})")
+        raise SubprocessFailedError(stage, return_code, cmd)
 
 
 def probe_duration_seconds(media_path: str, ffprobe_path: str = "ffprobe") -> float:
@@ -91,10 +149,16 @@ def probe_duration_seconds(media_path: str, ffprobe_path: str = "ffprobe") -> fl
         media_path,
     ]
     try:
-        output = subprocess.check_output(cmd, universal_newlines=True).strip()
+        output = subprocess.check_output(
+            cmd, universal_newlines=True, timeout=_PROBE_TIMEOUT_SECONDS
+        ).strip()
         return float(output)
-    except (subprocess.CalledProcessError, ValueError, FileNotFoundError) as exc:
-        raise EncodingError(f"Could not determine duration of {media_path}: {exc}")
+    except FileNotFoundError as exc:
+        raise FFmpegNotFoundError(f"Could not run {ffprobe_path!r}: {exc}") from exc
+    except subprocess.TimeoutExpired as exc:
+        raise ProbeError(f"Timed out determining duration of {media_path}") from exc
+    except (subprocess.CalledProcessError, ValueError) as exc:
+        raise ProbeError(f"Could not determine duration of {media_path}: {exc}") from exc
 
 
 def rgb24_to_rgb1555(raw_rgb24: bytes) -> bytes:
@@ -114,6 +178,7 @@ def _extract_thumbnail(
     ffmpeg_path: str,
     on_progress: Optional[ProgressCallback],
     work_dir: str,
+    cancel_event: Optional[threading.Event] = None,
 ) -> bytes:
     thumb_raw_path = os.path.join(work_dir, "thumb.raw")
     cmd = [
@@ -126,7 +191,9 @@ def _extract_thumbnail(
         "--", thumb_raw_path,
     ]
     try:
-        _run(cmd, "thumbnail", on_progress)
+        _run(cmd, "thumbnail", on_progress, cancel_event=cancel_event)
+    except EncodingCancelled:
+        raise
     except EncodingError:
         pass  # fall through to blank-thumbnail handling below
 
@@ -142,19 +209,27 @@ def _extract_thumbnail(
     return b"\x00" * THUMBNAIL_SIZE_BYTES
 
 
+def _check_cancelled(cancel_event: Optional[threading.Event], stage: str) -> None:
+    if cancel_event is not None and cancel_event.is_set():
+        raise EncodingCancelled(f"{stage} cancelled before starting")
+
+
 def encode(
     input_path: str,
     output_path: str,
     settings: Optional[EncodeSettings] = None,
     on_progress: Optional[ProgressCallback] = None,
+    cancel_event: Optional[threading.Event] = None,
 ) -> EncodeResult:
     """
     Transcode `input_path` (any FFmpeg-readable media file) into a DPG file
     at `output_path`, using `settings` for video/audio/DPG parameters.
 
-    Raises EncodingError on any FFmpeg or muxing failure. Does not validate
-    that `input_path`/`output_path` are within any particular directory —
-    that is the caller's concern (a web route, a file-picker dialog, etc.).
+    Raises EncodingError (or a subclass) on any FFmpeg or muxing failure,
+    and EncodingCancelled if `cancel_event` is set while encoding is in
+    progress. Does not validate that `input_path`/`output_path` are within
+    any particular directory — that is the caller's concern (a web route, a
+    file-picker dialog, etc.).
     """
     settings = settings or EncodeSettings()
 
@@ -165,6 +240,7 @@ def encode(
         audio_temp = os.path.join(work_dir, "audio.mp2")
         video_temp = os.path.join(work_dir, "video.m1v")
 
+        _check_cancelled(cancel_event, "audio")
         _report(on_progress, "audio", "encoding audio stream")
         audio_cmd = [
             settings.ffmpeg_path, "-y",
@@ -177,8 +253,9 @@ def encode(
             "-f", "mp2",
             "--", audio_temp,
         ]
-        _run(audio_cmd, "audio", on_progress)
+        _run(audio_cmd, "audio", on_progress, cancel_event=cancel_event)
 
+        _check_cancelled(cancel_event, "video")
         _report(on_progress, "video", "encoding video stream")
         video_cmd = [
             settings.ffmpeg_path, "-y",
@@ -191,10 +268,13 @@ def encode(
             "-f", "mpeg1video",
             "--", video_temp,
         ]
-        _run(video_cmd, "video", on_progress)
+        _run(video_cmd, "video", on_progress, cancel_event=cancel_event)
 
+        _check_cancelled(cancel_event, "thumbnail")
         _report(on_progress, "thumbnail", "extracting thumbnail")
-        thumb_data = _extract_thumbnail(input_path, settings.ffmpeg_path, on_progress, work_dir)
+        thumb_data = _extract_thumbnail(
+            input_path, settings.ffmpeg_path, on_progress, work_dir, cancel_event=cancel_event
+        )
 
         # Probe the *source* file's duration, not the raw .m1v elementary
         # stream: a headerless MPEG-1 video stream has no reliable container
@@ -207,7 +287,7 @@ def encode(
 
         _report(on_progress, "mux", "writing DPG header and streams")
         header = DpgHeader()
-        header.setVideo(frames=frames, fps=settings.video_fps, pixel=PIXEL_FORMAT_RGB24)
+        header.setVideo(frames=frames, fps=round(settings.video_fps), pixel=PIXEL_FORMAT_RGB24)
         header.setAudio(codec=settings.audio_codec, sampleRate=settings.audio_frequency)
         header.setSizes(version=settings.dpg_version, vSize=video_size, aSize=audio_size, gSize=0)
 

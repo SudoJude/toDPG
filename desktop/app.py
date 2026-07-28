@@ -2,52 +2,39 @@
 Standalone CustomTkinter desktop GUI for toDPG.
 
 Drag & drop (or browse for) video files, adjust output resolution/FPS,
-and convert them to .dpg using dpgcore.encode() — no Flask, no Docker.
+and convert them to .dpg using convqueue.ConversionQueue (itself built on
+dpgcore.encode()) — no Flask, no Docker. All queueing, threading, and
+progress-fraction math lives in convqueue, which has no CustomTkinter (or
+any GUI toolkit) dependency; this file only owns widgets and marshals
+convqueue's events onto the Tk main thread.
 """
 from __future__ import annotations
 
 import os
 import queue
-import re
 import shutil
-import threading
-from dataclasses import dataclass, field
 from tkinter import filedialog, messagebox
 
 import customtkinter as ctk
 from tkinterdnd2 import DND_FILES, TkinterDnD
 
-from dpgcore import EncodeSettings, EncodingError, encode, probe_duration_seconds
+from convqueue import ConversionQueue, EventKind, ItemStatus, QueueEvent, QueueItem
+from dpgcore import EncodeSettings
 
 VIDEO_EXTENSIONS = {
     ".avi", ".mp4", ".mkv", ".mov", ".webm", ".flv", ".wmv", ".m4v", ".mpg", ".mpeg", ".ts",
 }
 
 # ffmpeg's mpeg1video encoder only accepts standard MPEG-1 frame rates.
-VALID_FPS_OPTIONS = ["24", "25", "30"]
+# dpgcore snaps any fps to the nearest of these regardless, but offering
+# exactly these as choices means the GUI never shows a value that will be
+# silently changed underneath the user.
+FPS_OPTIONS = ["23.976", "24", "25", "29.97", "30"]
 
-# Fraction of overall progress attributed to each encode() stage.
-STAGE_WEIGHTS = {"audio": 0.15, "video": 0.80, "thumbnail": 0.03, "mux": 0.02, "done": 0.0}
-STAGE_START = {"audio": 0.0, "video": 0.15, "thumbnail": 0.95, "mux": 0.98, "done": 1.0}
-
-_TIME_RE = re.compile(r"time=(\d+):(\d+):(\d+\.?\d*)")
-
-
-def _parse_ffmpeg_time(line: str) -> float | None:
-    match = _TIME_RE.search(line)
-    if not match:
-        return None
-    hours, minutes, seconds = match.groups()
-    return int(hours) * 3600 + int(minutes) * 60 + float(seconds)
-
-
-@dataclass
-class QueueItem:
-    path: str
-    status: str = "Pending"
-    message: str = ""
-    row_frame: ctk.CTkFrame | None = field(default=None, repr=False)
-    status_label: ctk.CTkLabel | None = field(default=None, repr=False)
+_STATUS_COLORS = {
+    ItemStatus.ERROR: "#e05555",
+    ItemStatus.CANCELLED: "#c9a227",
+}
 
 
 class DnDCTk(ctk.CTk, TkinterDnD.DnDWrapper):
@@ -68,11 +55,11 @@ class ConverterApp(DnDCTk):
         self.geometry("720x680")
         self.minsize(640, 600)
 
-        self.queue_items: list[QueueItem] = []
+        self.queue = ConversionQueue()
+        self._widgets: dict[int, tuple[ctk.CTkFrame, ctk.CTkLabel]] = {}
         self.output_dir: str | None = None
-        self.progress_events: "queue.Queue[tuple]" = queue.Queue()
-        self.is_running = False
-        self.current_index: int | None = None
+        self.progress_events: "queue.Queue[QueueEvent]" = queue.Queue()
+        self.current_item: QueueItem | None = None
 
         self.ffmpeg_path = shutil.which("ffmpeg")
         self.ffprobe_path = shutil.which("ffprobe")
@@ -128,7 +115,7 @@ class ConverterApp(DnDCTk):
         self.height_entry.grid(row=0, column=3, padx=(0, 12), pady=10, sticky="w")
 
         ctk.CTkLabel(settings_frame, text="FPS").grid(row=0, column=4, padx=(12, 4), pady=10, sticky="w")
-        self.fps_combo = ctk.CTkComboBox(settings_frame, values=VALID_FPS_OPTIONS, width=80)
+        self.fps_combo = ctk.CTkComboBox(settings_frame, values=FPS_OPTIONS, width=90)
         self.fps_combo.set("24")
         self.fps_combo.grid(row=0, column=5, padx=(0, 12), pady=10, sticky="w")
 
@@ -156,17 +143,23 @@ class ConverterApp(DnDCTk):
 
         button_frame = ctk.CTkFrame(self, fg_color="transparent")
         button_frame.grid(row=6, column=0, sticky="ew", padx=12, pady=(0, 12))
-        button_frame.grid_columnconfigure((0, 1), weight=1)
+        button_frame.grid_columnconfigure((0, 1, 2), weight=1)
 
         self.convert_button = ctk.CTkButton(button_frame, text="Convert All", command=self._start_conversion)
         self.convert_button.grid(row=0, column=0, sticky="ew", padx=(0, 6))
         if not self.ffmpeg_path or not self.ffprobe_path:
             self.convert_button.configure(state="disabled")
 
+        self.cancel_button = ctk.CTkButton(
+            button_frame, text="Cancel", fg_color="#8a3b3b", hover_color="#732f2f",
+            command=self._cancel_conversion, state="disabled",
+        )
+        self.cancel_button.grid(row=0, column=1, sticky="ew", padx=6)
+
         self.clear_button = ctk.CTkButton(
             button_frame, text="Clear Queue", fg_color="#555555", hover_color="#444444", command=self._clear_queue
         )
-        self.clear_button.grid(row=0, column=1, sticky="ew", padx=(6, 0))
+        self.clear_button.grid(row=0, column=2, sticky="ew", padx=(6, 0))
 
     # --------------------------------------------------------------- queue
 
@@ -183,7 +176,7 @@ class ConverterApp(DnDCTk):
             self._add_files(paths)
 
     def _add_files(self, paths) -> None:
-        existing = {item.path for item in self.queue_items}
+        existing = {item.path for item in self.queue.items}
         skipped = []
         for path in paths:
             path = os.path.abspath(path)
@@ -195,51 +188,52 @@ class ConverterApp(DnDCTk):
                 continue
             if path in existing:
                 continue
-            self.queue_items.append(QueueItem(path=path))
+            self.queue.add(path)
             existing.add(path)
         if skipped:
             self._append_log(f"Skipped non-video file(s): {', '.join(skipped)}")
         self._refresh_queue_list()
 
     def _remove_item(self, item: QueueItem) -> None:
-        if item.status == "Encoding":
-            return
-        self.queue_items.remove(item)
-        self._refresh_queue_list()
+        if self.queue.remove(item):
+            self._refresh_queue_list()
 
     def _clear_queue(self) -> None:
-        self.queue_items = [item for item in self.queue_items if item.status == "Encoding"]
+        self.queue.clear_pending()
         self._refresh_queue_list()
 
     def _refresh_queue_list(self) -> None:
         for child in self.queue_frame.winfo_children():
             child.destroy()
+        self._widgets.clear()
 
-        if not self.queue_items:
+        if not self.queue.items:
             ctk.CTkLabel(self.queue_frame, text="No files queued.", text_color="#888888").grid(
                 row=0, column=0, sticky="w", padx=8, pady=8
             )
             return
 
-        for row, item in enumerate(self.queue_items):
+        for row, item in enumerate(self.queue.items):
             row_frame = ctk.CTkFrame(self.queue_frame, fg_color="transparent")
             row_frame.grid(row=row, column=0, sticky="ew", pady=2)
             row_frame.grid_columnconfigure(0, weight=1)
-            item.row_frame = row_frame
 
             name_label = ctk.CTkLabel(row_frame, text=os.path.basename(item.path), anchor="w")
             name_label.grid(row=0, column=0, sticky="ew", padx=(4, 8))
 
-            status_label = ctk.CTkLabel(row_frame, text=item.status, anchor="w", width=140)
+            status_label = ctk.CTkLabel(
+                row_frame, text=item.status.value, anchor="w", width=140,
+                text_color=_STATUS_COLORS.get(item.status),
+            )
             status_label.grid(row=0, column=1, sticky="w")
-            item.status_label = status_label
+            self._widgets[id(item)] = (row_frame, status_label)
 
             remove_btn = ctk.CTkButton(
                 row_frame, text="✕", width=28, fg_color="transparent", hover_color="#553333",
                 command=lambda i=item: self._remove_item(i),
             )
             remove_btn.grid(row=0, column=2, padx=(8, 4))
-            if item.status == "Encoding":
+            if item.status == ItemStatus.ENCODING:
                 remove_btn.configure(state="disabled")
 
     def _choose_output_folder(self) -> None:
@@ -262,17 +256,15 @@ class ConverterApp(DnDCTk):
         try:
             width = int(self.width_entry.get())
             height = int(self.height_entry.get())
-            fps = int(self.fps_combo.get())
+            fps = float(self.fps_combo.get())
             if width <= 0 or height <= 0:
                 raise ValueError
         except ValueError:
             messagebox.showerror("Invalid settings", "Width, height, and FPS must be positive numbers.")
             return None
-        if str(fps) not in VALID_FPS_OPTIONS:
-            messagebox.showerror(
-                "Invalid FPS", f"FPS must be one of {', '.join(VALID_FPS_OPTIONS)} (MPEG-1 constraint)."
-            )
-            return None
+        # dpgcore snaps video_fps/audio_frequency/audio_channels to
+        # MPEG-1/DPG-safe values itself, so no manual validation is needed
+        # beyond basic type/positivity checks above.
         return EncodeSettings(
             video_fps=fps,
             video_width=width,
@@ -282,9 +274,9 @@ class ConverterApp(DnDCTk):
         )
 
     def _start_conversion(self) -> None:
-        if self.is_running:
+        if self.queue.is_running():
             return
-        pending = [item for item in self.queue_items if item.status == "Pending"]
+        pending = [item for item in self.queue.items if item.status == ItemStatus.PENDING]
         if not pending:
             messagebox.showinfo("Nothing to convert", "Add some video files to the queue first.")
             return
@@ -292,48 +284,20 @@ class ConverterApp(DnDCTk):
         if settings is None:
             return
 
-        self.is_running = True
+        if self.output_dir:
+            for item in pending:
+                stem = os.path.splitext(os.path.basename(item.path))[0]
+                item.output_path = os.path.join(self.output_dir, stem + ".dpg")
+
         self.convert_button.configure(state="disabled")
         self.clear_button.configure(state="disabled")
+        self.cancel_button.configure(state="normal")
 
-        thread = threading.Thread(target=self._process_queue, args=(settings,), daemon=True)
-        thread.start()
+        self.queue.start(settings, on_event=self.progress_events.put)
 
-    def _process_queue(self, settings: EncodeSettings) -> None:
-        for index, item in enumerate(self.queue_items):
-            if item.status != "Pending":
-                continue
-
-            self.progress_events.put(("status", index, "Encoding", ""))
-
-            output_dir = self.output_dir or os.path.dirname(item.path)
-            stem = os.path.splitext(os.path.basename(item.path))[0]
-            output_path = os.path.join(output_dir, stem + ".dpg")
-
-            try:
-                duration = probe_duration_seconds(item.path, settings.ffprobe_path)
-            except EncodingError:
-                duration = 0.0
-
-            def on_progress(stage: str, message: str, _index=index, _duration=duration) -> None:
-                elapsed = _parse_ffmpeg_time(message)
-                if elapsed is not None and _duration > 0 and stage in STAGE_WEIGHTS:
-                    fraction = STAGE_START[stage] + min(elapsed / _duration, 1.0) * STAGE_WEIGHTS[stage]
-                    self.progress_events.put(("progress", _index, fraction, stage))
-                elif stage in STAGE_START:
-                    self.progress_events.put(("progress", _index, STAGE_START[stage], stage))
-                if "time=" in message or stage in ("thumbnail", "mux", "done"):
-                    self.progress_events.put(("log", f"[{stage}] {message}"))
-
-            try:
-                encode(item.path, output_path, settings, on_progress=on_progress)
-                self.progress_events.put(("status", index, "Done", output_path))
-            except EncodingError as exc:
-                self.progress_events.put(("status", index, "Error", str(exc)))
-            except Exception as exc:  # noqa: BLE001 - surface unexpected errors in the UI, not a crash
-                self.progress_events.put(("status", index, "Error", str(exc)))
-
-        self.progress_events.put(("all_done",))
+    def _cancel_conversion(self) -> None:
+        self.cancel_button.configure(state="disabled")
+        self.queue.cancel()
 
     # -------------------------------------------------------- main-thread
 
@@ -346,41 +310,43 @@ class ConverterApp(DnDCTk):
             pass
         self.after(150, self._poll_progress_events)
 
-    def _handle_event(self, event: tuple) -> None:
-        kind = event[0]
-
-        if kind == "status":
-            _, index, status, message = event
-            item = self.queue_items[index]
-            item.status = status
-            item.message = message
-            if item.status_label is not None and item.row_frame is not None and item.row_frame.winfo_exists():
-                item.status_label.configure(text=status)
-            if status == "Encoding":
-                self.current_index = index
+    def _handle_event(self, event: QueueEvent) -> None:
+        if event.kind == EventKind.STATUS:
+            item = event.item
+            widgets = self._widgets.get(id(item))
+            if widgets is not None:
+                _, status_label = widgets
+                if status_label.winfo_exists():
+                    status_label.configure(
+                        text=item.status.value, text_color=_STATUS_COLORS.get(item.status)
+                    )
+            if item.status == ItemStatus.ENCODING:
+                self.current_item = item
                 self.current_file_label.configure(text=f"Converting: {os.path.basename(item.path)}")
                 self.progress_bar.set(0)
-            elif status == "Done":
-                self._append_log(f"Done: {message}")
-            elif status == "Error":
-                self._append_log(f"Error converting {os.path.basename(item.path)}: {message}")
+            elif item.status == ItemStatus.DONE:
+                self._append_log(f"Done: {item.message}")
+            elif item.status == ItemStatus.ERROR:
+                self._append_log(f"Error converting {os.path.basename(item.path)}: {item.message}")
+            elif item.status == ItemStatus.CANCELLED:
+                self._append_log(f"Cancelled: {os.path.basename(item.path)}")
 
-        elif kind == "progress":
-            _, index, fraction, stage = event
-            if index == self.current_index:
-                self.progress_bar.set(min(max(fraction, 0.0), 1.0))
+        elif event.kind == EventKind.PROGRESS:
+            if event.item is self.current_item:
+                fraction = min(max(event.fraction or 0.0, 0.0), 1.0)
+                self.progress_bar.set(fraction)
                 self.current_file_label.configure(
-                    text=f"Converting: {os.path.basename(self.queue_items[index].path)} ({stage}, {fraction * 100:.0f}%)"
+                    text=f"Converting: {os.path.basename(event.item.path)} ({event.stage}, {fraction * 100:.0f}%)"
                 )
 
-        elif kind == "log":
-            self._append_log(event[1])
+        elif event.kind == EventKind.LOG:
+            self._append_log(event.message)
 
-        elif kind == "all_done":
-            self.is_running = False
-            self.current_index = None
+        elif event.kind == EventKind.ALL_DONE:
+            self.current_item = None
             self.convert_button.configure(state="normal")
             self.clear_button.configure(state="normal")
+            self.cancel_button.configure(state="disabled")
             self.current_file_label.configure(text="All conversions complete.")
             self.progress_bar.set(1)
 

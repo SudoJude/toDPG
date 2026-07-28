@@ -13,3 +13,4 @@ dist/debian/debhelper*
 dist/debian/.debhelper
 MANIFEST
 node_modules
+.pytest_cache
