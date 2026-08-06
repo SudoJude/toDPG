@@ -41,3 +41,11 @@ Then open [http://localhost:8080](http://localhost:8080). See `docker-compose.ym
 ## Contributing
 
 This project is under active migration — expect things to move around.
+
+## AI Disclaimer
+
+The original app this project was based upon frequently used AI coding agents to help with development. As much of this project was already written with AI by the original developer, I have also used Claude Code in certain areas to help with development. No code is published without being thoroughly reviewed, and I have the same high code quality standards for toDPG as my other projects.
+
+## License
+
+toDPG is licensed under the [GNU General Public License v3.0](LICENSE), the same license as upstream dpg4x.
